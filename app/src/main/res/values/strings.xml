@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">easy2share</string>
+
+    <!-- Welcome / Onboarding -->
+    <string name="welcome_skip">Skip</string>
+    <string name="welcome_next">Next</string>
+    <string name="welcome_get_started">Get Started</string>
+
+    <string name="welcome_1_kicker">EASY2SHARE</string>
+    <string name="welcome_1_title">Send anything\nto your PC</string>
+    <string name="welcome_1_body">Photos, files and links leave your phone and land on your computer in an instant — no cables, no clutter.</string>
+
+    <string name="welcome_2_kicker">STAY IN SYNC</string>
+    <string name="welcome_2_title">One secure\nwireless link</string>
+    <string name="welcome_2_body">Your phone and PC talk over an encrypted two-way connection, so content flows both ways the moment you need it.</string>
+</resources>
