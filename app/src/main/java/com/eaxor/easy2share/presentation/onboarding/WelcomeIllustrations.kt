@@ -1,4 +1,4 @@
-package com.eaxor.easy2share.onboarding
+package com.eaxor.easy2share.presentation.onboarding
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode

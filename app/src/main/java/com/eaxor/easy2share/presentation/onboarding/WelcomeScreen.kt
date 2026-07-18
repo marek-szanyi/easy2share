@@ -1,4 +1,4 @@
-package com.eaxor.easy2share.onboarding
+package com.eaxor.easy2share.presentation.onboarding
 
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
@@ -39,7 +38,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,21 +48,16 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.eaxor.easy2share.R
 import com.eaxor.easy2share.ui.theme.BrandIndigo
 import com.eaxor.easy2share.ui.theme.BrandTeal
-import com.eaxor.easy2share.ui.theme.BrandViolet
 import com.eaxor.easy2share.ui.theme.DarkOnSurfaceVariant
-import com.eaxor.easy2share.ui.theme.DarkOutline
-import com.eaxor.easy2share.ui.theme.DarkSurfaceDim
 import com.eaxor.easy2share.ui.theme.Easy2shareColors
 import com.eaxor.easy2share.ui.theme.Easy2shareTheme
 import com.eaxor.easy2share.ui.theme.LightBackground
-import com.eaxor.easy2share.ui.theme.LightOnSurface
 import com.eaxor.easy2share.ui.theme.LightOnSurfaceVariant
 import com.eaxor.easy2share.ui.theme.LightOutline
 import com.eaxor.easy2share.ui.theme.LightSurface
@@ -74,7 +67,6 @@ import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
-import kotlin.reflect.typeOf
 
 /**
  * Immutable description of one onboarding page: its copy and the [Canvas]-drawn
@@ -108,7 +100,25 @@ private val welcomePages: List<WelcomePage> = listOf(
 )
 
 /**
- * The first-run welcome experience.
+ * Stateful entry point for the welcome experience.
+ *
+ * Binds the [WelcomeViewModel] to the stateless [WelcomeScreen] content: the
+ * only piece of state the UI cares about is "onboarding finished", which it
+ * reports back through the ViewModel — the ViewModel then talks to the domain.
+ */
+@Composable
+fun WelcomeScreen(
+    viewModel: WelcomeViewModel,
+    modifier: Modifier = Modifier,
+) {
+    WelcomeScreen(
+        onFinished = viewModel::completeOnboarding,
+        modifier = modifier,
+    )
+}
+
+/**
+ * Stateless first-run welcome experience.
  *
  * A horizontally paged story with a living aurora backdrop. Each page pairs an
  * animated illustration with a short text section, and a set of custom controls
@@ -149,8 +159,8 @@ fun WelcomeScreen(
 
     Box(modifier = modifier.fillMaxSize()) {
         AuroraBackground(
-            primary = accentSecondary,
-            secondary = BrandTeal,
+            primary = BrandTeal,
+            secondary = accentSecondary,
             modifier = Modifier.fillMaxSize(),
         )
 
@@ -388,7 +398,7 @@ private fun PageIndicator(
  * A slow-moving aurora rendered as overlapping radial-gradient blobs over the
  * themed surface. Blob hues are seeded from the live [primary] / [secondary]
  * accents (so the backdrop shifts as the user pages through the story) plus two
- * fixed accents pulled from the theme's [ExtendedColors].
+ * fixed accents pulled from the theme's [com.eaxor.easy2share.ui.theme.ExtendedColors].
  */
 @Composable
 private fun AuroraBackground(
@@ -409,8 +419,8 @@ private fun AuroraBackground(
 
     val extended = Easy2shareColors.extended
     val blobColors = listOf(
-        extended.auroraTop,
-        extended.auroraBottom,
+        primary,
+        secondary,
         extended.auroraBlobViolet,
         extended.auroraBlobTeal,
     )
@@ -418,7 +428,7 @@ private fun AuroraBackground(
     Canvas(
         modifier = modifier.background(
             Brush.verticalGradient(
-                colors = listOf(extended.auroraTop, extended.auroraBottom),
+                colors = listOf(LightSurfaceDim , extended.auroraBottom),
             ),
         ),
     ) {
@@ -453,3 +463,4 @@ private fun WelcomeScreenPreview() {
         WelcomeScreen(onFinished = {})
     }
 }
+
