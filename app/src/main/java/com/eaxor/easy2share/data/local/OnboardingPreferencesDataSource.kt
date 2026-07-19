@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
 /**
  * [OnboardingLocalDataSource] backed by Jetpack [DataStore].
@@ -14,7 +15,7 @@ import kotlinx.coroutines.flow.map
  * reactive, coroutine-friendly source that exposes the completion flag as a
  * [Flow], so the rest of the app can observe changes rather than poll.
  */
-class OnboardingPreferencesDataSource(
+class OnboardingPreferencesDataSource @Inject constructor(
     private val dataStore: DataStore<Preferences>,
 ) : OnboardingLocalDataSource {
 

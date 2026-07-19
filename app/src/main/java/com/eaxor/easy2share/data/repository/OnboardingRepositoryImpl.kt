@@ -3,6 +3,7 @@ package com.eaxor.easy2share.data.repository
 import com.eaxor.easy2share.data.local.OnboardingLocalDataSource
 import com.eaxor.easy2share.domain.repository.OnboardingRepository
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
 /**
  * Data-layer implementation of the domain's [OnboardingRepository].
@@ -10,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
  * Delegates to an [OnboardingLocalDataSource]. This is where remote sources,
  * caching or mapping would be coordinated if the feature grew.
  */
-class OnboardingRepositoryImpl(
+class OnboardingRepositoryImpl @Inject constructor(
     private val localDataSource: OnboardingLocalDataSource,
 ) : OnboardingRepository {
 

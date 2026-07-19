@@ -8,37 +8,33 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.ViewModelProvider
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.eaxor.easy2share.di.ViewModelFactory
 import com.eaxor.easy2share.presentation.home.HomeScreen
 import com.eaxor.easy2share.presentation.home.HomeViewModel
 import com.eaxor.easy2share.presentation.main.MainViewModel
 import com.eaxor.easy2share.presentation.onboarding.WelcomeScreen
 import com.eaxor.easy2share.presentation.onboarding.WelcomeViewModel
 import com.eaxor.easy2share.ui.theme.Easy2shareTheme
+import dagger.hilt.android.AndroidEntryPoint
 
 /**
  * The single Activity and composition root.
  *
- * It obtains the [ViewModelFactory] from the application-scoped container and
- * hands it to the Compose tree. It contains no business or data-access logic —
- * everything flows through ViewModels and use cases.
+ * Annotated with [AndroidEntryPoint] so Hilt can inject dependencies into the
+ * Compose tree via [hiltViewModel]. It contains no business or data-access
+ * logic — everything flows through ViewModels and use cases.
  */
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        val viewModelFactory = ViewModelFactory(
-            (application as Easy2ShareApplication).container,
-        )
-
         setContent {
             Easy2shareTheme {
-                Easy2ShareApp(viewModelFactory = viewModelFactory)
+                Easy2ShareApp()
             }
         }
     }
@@ -49,15 +45,15 @@ class MainActivity : ComponentActivity() {
  * the onboarding flow or the home surface, and scopes each screen's ViewModel.
  */
 @Composable
-private fun Easy2ShareApp(viewModelFactory: ViewModelProvider.Factory) {
-    val mainViewModel: MainViewModel = viewModel(factory = viewModelFactory)
+private fun Easy2ShareApp() {
+    val mainViewModel: MainViewModel = hiltViewModel()
     val uiState by mainViewModel.uiState.collectAsStateWithLifecycle()
 
     when {
         uiState.isLoading -> Unit // brief splash while the first value is loaded
 
         uiState.onboardingCompleted -> {
-            val homeViewModel: HomeViewModel = viewModel(factory = viewModelFactory)
+            val homeViewModel: HomeViewModel = hiltViewModel()
             HomeScreen(
                 viewModel = homeViewModel,
                 modifier = Modifier.fillMaxSize(),
@@ -65,7 +61,7 @@ private fun Easy2ShareApp(viewModelFactory: ViewModelProvider.Factory) {
         }
 
         else -> {
-            val welcomeViewModel: WelcomeViewModel = viewModel(factory = viewModelFactory)
+            val welcomeViewModel: WelcomeViewModel = hiltViewModel()
             WelcomeScreen(
                 viewModel = welcomeViewModel,
                 modifier = Modifier.fillMaxSize(),
