@@ -14,6 +14,12 @@ konsist = "0.17.3"
 hilt = "2.60.1"
 hiltNavigationCompose = "1.4.0"
 ksp = "2.2.10-2.0.2"
+accompanist = "0.37.3"
+runtime = "1.11.4"
+material3 = "1.4.0"
+leanback = "1.2.0"
+material3Version = "1.4.0"
+spotless = "8.8.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -40,10 +46,16 @@ androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "u
 androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
+accompanist-permissions = { group = 'com.google.accompanist', name = 'accompanist-permissions' , version.ref ='accompanist' }
+androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime", version.ref = "runtime" }
+androidx-material-icons-extended = { group = 'androidx.compose.material', name = 'material-icons-extended' }
+androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3Version" }
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 

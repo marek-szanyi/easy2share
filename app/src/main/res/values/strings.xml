@@ -13,4 +13,20 @@
     <string name="welcome_2_kicker">STAY IN SYNC</string>
     <string name="welcome_2_title">One secure\nwireless link</string>
     <string name="welcome_2_body">Your phone and PC talk over an encrypted two-way connection, so content flows both ways the moment you need it.</string>
+    <string name="cd_settings">Settings</string>
+    <string name="dialog_permission_title">Permission Needed</string>
+    <string name="dialog_permission_message">The app functionality requires permissions</string>
+    <string name="dialog_permission_instruction">If these permissions are not given the app cannot function properly</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="dialog_open_settings">Android Settings</string>
+    <string name="action_skip">Skip</string>
+    <string name="action_enable">Enable</string>
+    <string name="dialog_welcome_note">Welcome note bla bla bla</string>
+    <string name="dialog_welcome_message">Welcome bla bla</string>
+    <string name="dialog_welcome_title">Permissions needed</string>
+    <string name="cd_notifications">Notifications</string>
+    <string name="server_running">SHARING ON!</string>
+    <string name="ready_to_share">READY TO SHARE</string>
+    <string name="awaiting_authentications">AWAITING CLIENT(s)</string>
+    <string name="not_sharing">NOT SHARING</string>
 </resources>

@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2026 Eaxor llc.
+ * SPDX-License-Identifier: MIT
+ * Licensed under the MIT License. See LICENSE file in the project root for full license information.
+ */
 package com.eaxor.easy2share.ui.theme
 
 import androidx.compose.ui.graphics.Color
@@ -27,9 +32,13 @@ val OnAccent = Color(0xFF5E5E5E)
 val LightBackground = Color(0xF0F5F6F6)
 val LightSurface = Color(0xFFFBFCFE)
 val LightSurfaceDim = Color(0xFFBBD3FF)
-val LightOnSurface = Color(0xFF1B1D24)        // titles / high emphasis
+val LightOnSurface = Color(0xFF1B1D24) // titles / high emphasis
 val LightOnSurfaceVariant = Color(0xFF3F434C) // body / secondary text
-val LightOutline = Color(0xFF5B606B)          // medium emphasis (e.g. Skip)
+val LightOutline = Color(0xFF5B606B) // medium emphasis (e.g. Skip)
+
+val LightWidgetDarkBlue = Color(0xFF192543)
+
+val LightWidgetLightBlue = Color(0xFF3C538C)
 
 // --- Dark surfaces & content -------------------------------------------------
 val DarkBackground = Color(0xFF0F1218)

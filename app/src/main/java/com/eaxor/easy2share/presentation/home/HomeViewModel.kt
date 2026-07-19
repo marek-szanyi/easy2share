@@ -1,19 +1,19 @@
 package com.eaxor.easy2share.presentation.home
 
+import android.Manifest
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.eaxor.easy2share.Easy2ShareApplication
 import com.eaxor.easy2share.domain.usecase.GetGreetingUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
-/**
- * Immutable UI state for the home surface.
- */
-data class HomeUiState(
-    val greeting: String = "",
-)
 
 /**
  * ViewModel for the home surface.
@@ -23,16 +23,19 @@ data class HomeUiState(
  * concern and therefore lives here rather than in the use case.
  */
 @HiltViewModel
-class HomeViewModel @Inject constructor(
-    getGreetingUseCase: GetGreetingUseCase,
-) : ViewModel() {
+class HomeViewModel @Inject constructor() : ViewModel() {
 
-    private val _uiState = MutableStateFlow(HomeUiState())
+
+    private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.PermissionsNeeded)
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
+    private val _events = MutableSharedFlow<HomeEvents>(replay = 0)
+    val events : SharedFlow<HomeEvents> = _events.asSharedFlow()
+
     init {
-        val greeting = getGreetingUseCase()
-        _uiState.value = HomeUiState(greeting = "Hello ${greeting.recipient}!")
+
+
     }
+
 }
 
