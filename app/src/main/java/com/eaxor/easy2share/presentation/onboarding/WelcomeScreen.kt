@@ -1,6 +1,5 @@
 package com.eaxor.easy2share.presentation.onboarding
 
-import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearEasing
@@ -37,8 +36,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -51,6 +52,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.eaxor.easy2share.R
 import com.eaxor.easy2share.ui.theme.BrandIndigo
 import com.eaxor.easy2share.ui.theme.BrandTeal
@@ -69,49 +71,23 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 /**
- * Immutable description of one onboarding page: its copy and the [Canvas]-drawn
- * illustration that heads it. Accent colours are supplied by the theme at render
- * time rather than baked in here.
- */
-private data class WelcomePage(
-    @StringRes val kicker: Int,
-    @StringRes val title: Int,
-    @StringRes val body: Int,
-    val illustration: @Composable (accent: Color, accentSecondary: Color, modifier: Modifier) -> Unit,
-)
-
-private val welcomePages: List<WelcomePage> = listOf(
-    WelcomePage(
-        kicker = R.string.welcome_1_kicker,
-        title = R.string.welcome_1_title,
-        body = R.string.welcome_1_body,
-        illustration = { accent, accentSecondary, modifier ->
-            PhoneToPcIllustration(accent, accentSecondary, modifier)
-        },
-    ),
-    WelcomePage(
-        kicker = R.string.welcome_2_kicker,
-        title = R.string.welcome_2_title,
-        body = R.string.welcome_2_body,
-        illustration = { accent, accentSecondary, modifier ->
-            WirelessSyncIllustration(accent, accentSecondary, modifier)
-        },
-    ),
-)
-
-/**
  * Stateful entry point for the welcome experience.
  *
- * Binds the [WelcomeViewModel] to the stateless [WelcomeScreen] content: the
- * only piece of state the UI cares about is "onboarding finished", which it
- * reports back through the ViewModel — the ViewModel then talks to the domain.
+ * Binds the [WelcomeViewModel] to the stateless [WelcomeScreen] content
+ * following unidirectional data flow: [WelcomeUiState] flows down, events
+ * ([WelcomeViewModel.onPageShown], [WelcomeViewModel.completeOnboarding])
+ * flow back up to the ViewModel — the ViewModel then talks to the domain.
  */
 @Composable
 fun WelcomeScreen(
     viewModel: WelcomeViewModel,
     modifier: Modifier = Modifier,
 ) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
     WelcomeScreen(
+        uiState = uiState,
+        onPageShown = viewModel::onPageShown,
         onFinished = viewModel::completeOnboarding,
         modifier = modifier,
     )
@@ -123,16 +99,28 @@ fun WelcomeScreen(
  * A horizontally paged story with a living aurora backdrop. Each page pairs an
  * animated illustration with a short text section, and a set of custom controls
  * (page indicator, Skip and a morphing Next / Get&nbsp;Started button) drives the
- * flow. [onFinished] is invoked when the user skips or reaches the end.
+ * flow. All content and the logical position come from [uiState]; transient
+ * scroll / animation mechanics remain view-internal. [onPageShown] reports the
+ * settled page back to the state owner, and [onFinished] is invoked when the
+ * user skips or reaches the end.
  */
 @Composable
 fun WelcomeScreen(
+    uiState: WelcomeUiState,
+    onPageShown: (Int) -> Unit,
     onFinished: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val pages = welcomePages
+    val pages = uiState.pages
+    if (pages.isEmpty()) return
+
     val pagerState = rememberPagerState(pageCount = { pages.size })
     val scope = rememberCoroutineScope()
+
+    // Mirror the pager's settled page into the ViewModel-owned UI state.
+    LaunchedEffect(pagerState, onPageShown) {
+        snapshotFlow { pagerState.currentPage }.collect { onPageShown(it) }
+    }
 
     // Per-page accent pairs drawn straight from the themed colour scheme.
 
@@ -155,7 +143,7 @@ fun WelcomeScreen(
     val accentSecondary =
         lerp(accentPairs[lower].second, accentPairs[upper].second, blend)
 
-    val isLastPage = pagerState.currentPage == pages.lastIndex
+    val isLastPage = uiState.isLastPage
 
     Box(modifier = modifier.fillMaxSize()) {
         AuroraBackground(
@@ -255,7 +243,7 @@ private fun WelcomePageContent(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f)
+                .weight(0.8f)
                 .graphicsLayer {
                     // Illustration drifts a little slower than the swipe for depth.
                     translationX = pageOffset * size.width * 0.15f
@@ -263,12 +251,18 @@ private fun WelcomePageContent(
                 },
             contentAlignment = Alignment.Center,
         ) {
-            page.illustration(accent, accentSecondary, Modifier.fillMaxSize())
+            PageIllustration(
+                illustration = page.illustration,
+                accent = accent,
+                accentSecondary = accentSecondary,
+                modifier = Modifier.fillMaxSize(),
+            )
         }
 
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .weight(0.3f)
                 .padding(bottom = 8.dp)
                 .graphicsLayer {
                     // Text trails slightly faster for a layered feel.
@@ -281,9 +275,9 @@ private fun WelcomePageContent(
                 color = accent,
                 fontWeight = FontWeight.SemiBold,
                 letterSpacing = 3.sp,
-                style = MaterialTheme.typography.labelLarge,
+                style = MaterialTheme.typography.headlineSmall,
             )
-            Spacer(Modifier.height(12.dp))
+//            Spacer(Modifier.height(12.dp))
             Text(
                 text = stringResource(page.title),
                 color = MaterialTheme.colorScheme.onSurface,
@@ -301,6 +295,27 @@ private fun WelcomePageContent(
 }
 
 /**
+ * Maps the ViewModel-supplied [WelcomeIllustration] descriptor onto its
+ * [Canvas]-drawn rendering. Keeping this mapping in the View lets the state
+ * layer stay free of Compose types while the View owns all drawing concerns.
+ */
+@Composable
+private fun PageIllustration(
+    illustration: WelcomeIllustration,
+    accent: Color,
+    accentSecondary: Color,
+    modifier: Modifier = Modifier,
+) {
+    when (illustration) {
+        WelcomeIllustration.PHONE_TO_PC ->
+            PhoneToPcIllustration(accent, accentSecondary, modifier)
+
+        WelcomeIllustration.WIRELESS_SYNC ->
+            WirelessSyncIllustration(accent, accentSecondary, modifier)
+    }
+}
+
+/**
  * Page indicator plus the primary action button, which morphs from *Next* into
  * *Get Started* on the final page. Its container colour follows the live accent.
  */
@@ -314,7 +329,10 @@ private fun WelcomeControls(
     onFinished: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val buttonColor by animateColorAsState(targetValue = LightOnSurfaceVariant, label = "buttonColor")
+    val buttonColor by animateColorAsState(
+        animationSpec = tween(durationMillis = 800),
+        targetValue = LightOnSurfaceVariant,
+        label = "buttonColor")
 
     Column(
         modifier = modifier,
@@ -460,7 +478,11 @@ private fun AuroraBackground(
 @Composable
 private fun WelcomeScreenPreview() {
     Easy2shareTheme {
-        WelcomeScreen(onFinished = {})
+        WelcomeScreen(
+            uiState = WelcomeUiState(pages = welcomePages),
+            onPageShown = {},
+            onFinished = {},
+        )
     }
 }
 

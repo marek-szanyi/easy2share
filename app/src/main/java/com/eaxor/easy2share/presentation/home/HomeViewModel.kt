@@ -2,9 +2,11 @@ package com.eaxor.easy2share.presentation.home
 
 import androidx.lifecycle.ViewModel
 import com.eaxor.easy2share.domain.usecase.GetGreetingUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import javax.inject.Inject
 
 /**
  * Immutable UI state for the home surface.
@@ -20,7 +22,8 @@ data class HomeUiState(
  * and maps it into a display-ready [HomeUiState]. Formatting is a presentation
  * concern and therefore lives here rather than in the use case.
  */
-class HomeViewModel(
+@HiltViewModel
+class HomeViewModel @Inject constructor(
     getGreetingUseCase: GetGreetingUseCase,
 ) : ViewModel() {
 

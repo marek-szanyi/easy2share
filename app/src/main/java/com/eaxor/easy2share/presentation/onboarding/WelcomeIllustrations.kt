@@ -60,20 +60,20 @@ fun PhoneToPcIllustration(
         // --- Device geometry ---------------------------------------------------
         val phoneW = w * 0.17f
         val phoneH = phoneW * 2.02f
-        val phoneTopLeft = Offset(w * 0.05f, centerY - phoneH / 2.5f)
+        val phoneTopLeft = Offset(w * 0.15f, centerY + (centerY * 1f/5f))
 
-        val monitorW = w * 0.24f
+        val monitorW = w * 0.35f
         val monitorH = monitorW * 0.59f
-        val monitorTopLeft = Offset(w - monitorW - w * 0.05f, centerY *  1f/3f) //+ monitorH / 0.5f - h * 0.03f)
+        val monitorTopLeft = Offset(w - monitorW - w * 0.15f, centerY *  1f/3f) //+ monitorH / 0.5f - h * 0.03f)
 
-        val start = Offset(phoneTopLeft.x + phoneW, centerY)
+        val start = Offset(phoneTopLeft.x + phoneW, phoneTopLeft.y- 0.5f)
         val end = Offset(monitorTopLeft.x, monitorTopLeft.y + monitorH / 2f)
         val control = Offset((start.x + end.x) / 2f, centerY - h * 0.20f)
 
         // --- Beam --------------------------------------------------------------
         val beam = Path().apply {
             moveTo(start.x, start.y)
-            quadraticBezierTo(control.x, control.y, end.x, end.y)
+            quadraticTo(control.x, control.y, end.x, end.y)
         }
         drawPath(
             path = beam,

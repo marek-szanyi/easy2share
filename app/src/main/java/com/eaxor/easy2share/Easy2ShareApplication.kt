@@ -1,23 +1,14 @@
 package com.eaxor.easy2share
 
 import android.app.Application
-import com.eaxor.easy2share.di.AppContainer
-import com.eaxor.easy2share.di.DefaultAppContainer
+import dagger.hilt.android.HiltAndroidApp
 
 /**
  * Application entry point.
  *
- * Owns the [AppContainer] for the process lifetime, giving the composition root
- * (the Activity) a single place to obtain wired-up dependencies.
+ * Annotated with [HiltAndroidApp] so Hilt can generate the application-level
+ * dependency container and serve as the parent of every other Hilt component.
  */
-class Easy2ShareApplication : Application() {
-
-    lateinit var container: AppContainer
-        private set
-
-    override fun onCreate() {
-        super.onCreate()
-        container = DefaultAppContainer(this)
-    }
-}
+@HiltAndroidApp
+class Easy2ShareApplication : Application()
 
