@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2026 Eaxor llc.
+ * SPDX-License-Identifier: MIT
+ * Licensed under the MIT License. See LICENSE file in the project root for full license information.
+ */
 package com.eaxor.easy2share
 
 import android.os.Bundle
@@ -15,6 +20,7 @@ import com.eaxor.easy2share.presentation.home.HomeViewModel
 import com.eaxor.easy2share.presentation.main.MainViewModel
 import com.eaxor.easy2share.presentation.onboarding.WelcomeScreen
 import com.eaxor.easy2share.presentation.onboarding.WelcomeViewModel
+import com.eaxor.easy2share.presentation.permissions.PermissionDialogs
 import com.eaxor.easy2share.ui.theme.Easy2shareTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -27,7 +33,6 @@ import dagger.hilt.android.AndroidEntryPoint
  */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -46,17 +51,19 @@ class MainActivity : ComponentActivity() {
  */
 @Composable
 private fun Easy2ShareApp() {
-    val mainViewModel: MainViewModel = hiltViewModel()
+    val mainViewModel: MainViewModel = hiltViewModel<MainViewModel>()
     val uiState by mainViewModel.uiState.collectAsStateWithLifecycle()
 
     when {
-        uiState.isLoading -> Unit // brief splash while the first value is loaded
+        uiState.isLoading -> {
+            Unit
+        }
 
         uiState.onboardingCompleted -> {
+            PermissionDialogs()
             val homeViewModel: HomeViewModel = hiltViewModel()
             HomeScreen(
                 viewModel = homeViewModel,
-                modifier = Modifier.fillMaxSize(),
             )
         }
 

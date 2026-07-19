@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2026 Eaxor llc.
+ * SPDX-License-Identifier: MIT
+ * Licensed under the MIT License. See LICENSE file in the project root for full license information.
+ */
 package com.eaxor.easy2share.ui.theme
 
 import androidx.compose.material3.Typography
@@ -7,14 +12,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
 // Set of Material typography styles to start with
-val Typography = Typography(
-    bodyLarge = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = 16.sp,
-        lineHeight = 24.sp,
-        letterSpacing = 0.5.sp
-    )
+val Typography =
+    Typography(
+        bodyLarge =
+            TextStyle(
+                fontFamily = FontFamily.Default,
+                fontWeight = FontWeight.Normal,
+                fontSize = 16.sp,
+                lineHeight = 24.sp,
+                letterSpacing = 0.5.sp,
+            ),
     /* Other default text styles to override
     titleLarge = TextStyle(
         fontFamily = FontFamily.Default,
@@ -30,5 +37,5 @@ val Typography = Typography(
         lineHeight = 16.sp,
         letterSpacing = 0.5.sp
     )
-    */
-)
+     */
+    )

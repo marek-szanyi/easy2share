@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2026 Eaxor llc.
+ * SPDX-License-Identifier: MIT
+ * Licensed under the MIT License. See LICENSE file in the project root for full license information.
+ */
 package com.eaxor.easy2share
 
 import android.app.Application
@@ -11,4 +16,3 @@ import dagger.hilt.android.HiltAndroidApp
  */
 @HiltAndroidApp
 class Easy2ShareApplication : Application()
-
