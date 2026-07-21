@@ -8,6 +8,7 @@ package com.eaxor.easy2share.presentation.home
 import android.annotation.SuppressLint
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -21,10 +22,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -99,15 +102,15 @@ fun HomeScreen(viewModel: HomeViewModel) {
 
             Column(modifier = Modifier.fillMaxSize()) {
                 if (!isCompactHeight) {
-                    Header(modifier = Modifier.padding(horizontal = 5.dp, vertical = 5.dp))
+                    Header(modifier = Modifier.padding(horizontal =0.dp, vertical = 5.dp))
                 }
 
                 if (useHorizontalLayout) {
                     Row(
                         modifier =
                             Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = horizontalPadding),
+                                .fillMaxWidth(),
+
                         horizontalArrangement = Arrangement.spacedBy(horizontalPadding),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
@@ -125,32 +128,24 @@ fun HomeScreen(viewModel: HomeViewModel) {
                 } else {
                     CreditCard(
                         compact = isCompactHeight,
-                        modifier = Modifier.padding(horizontal = horizontalPadding),
+
                     )
                     ActionButtonsRow(
                         compact = isCompactHeight,
                         modifier =
                             Modifier.padding(
-                                horizontal = horizontalPadding,
-                                vertical = if (isCompactHeight) 8.dp else 24.dp,
+                               //vertical = if (isCompactHeight) 8.dp else 24.dp,
                             ),
                     )
                 }
 
-                TransactionHeader(
-                    modifier =
-                        Modifier.padding(
-                            horizontal = horizontalPadding,
-                            vertical = 4.dp,
-                        ),
-                )
 
                 LazyColumn(
                     modifier =
                         Modifier
                             .fillMaxWidth()
                             .weight(1f),
-                    contentPadding = PaddingValues(bottom = 24.dp),
+                    //contentPadding = PaddingValues(bottom = 24.dp),
                 ) {
                     items(sampleTransactions) { transaction ->
                         TransactionItem(
@@ -172,7 +167,7 @@ val contentPadding = 24.dp
 
 @Composable
 fun Header(modifier: Modifier = Modifier) {
-    Spacer(modifier = modifier.height(1.dp))
+//    Spacer(modifier = modifier.height(1.dp))
 }
 
 @Composable
@@ -187,8 +182,9 @@ fun CreditCard(
             modifier
                 .fillMaxWidth()
                 .height(cardHeight),
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape( 0.dp, 0.dp, 0.dp, .0.dp),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+        border = BorderStroke(2.dp, LightWidgetDarkBlue)
     ) {
         Box(
             modifier =
@@ -231,14 +227,14 @@ fun CreditCard(
                         text = stringResource(R.string.enter_url_title),
                         color = LightSurface,
                         modifier = Modifier.padding(horizontal = 8.dp),
-                        fontSize = if (compact) 10.sp else 12.sp,
+                        fontSize = if (compact) 11.sp else 13.sp,
                     )
                 }
 
                 Text(
                     text = "http://192.168.0.25/",
                     color = Color.White,
-                    fontSize = if (compact) 20.sp else 24.sp,
+                    fontSize = if (compact) 24.sp else 28.sp,
                     fontWeight = FontWeight.Medium,
                     letterSpacing = if (compact) 1.sp else 2.sp,
                     textAlign = TextAlign.Center,
@@ -313,21 +309,48 @@ fun ActionButtonsRow(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly,
     ) {
+
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxHeight(0.2f)
+                        .fillMaxWidth()
+                        .background(
+                            brush =
+                                Brush.verticalGradient(
+                                    colors =
+                                        listOf(
+                                            Color(LightSurface.value), // Dark blue
+                                            Color(DarkOnSurface.value), // Slightly lighter blue
+                                        ),
+                                ),
+                        ),
+                contentAlignment = Alignment.Center,
+            ) {
+                Column(
+                    verticalArrangement = Arrangement.Bottom,
+                ) {
 //        ActionButton(iconRes = R.drawable.ic_arrow_up_wallet, label = "Sent")
-        ActionButton(
-            icon = Icons.Rounded.Share,
-            label = stringResource(R.string.share_clipboard_title),
-            onClick = onShareClipboardClick,
-            compact = compact,
-        )
-        ActionButton(
-            icon = Icons.Rounded.FileOpen,
-            label = stringResource(R.string.share_files_title),
-            onClick = onShareFileClick,
-            compact = compact,
-        )
+                    ActionButton(
+                        icon = Icons.Rounded.Share,
+                        label = stringResource(R.string.share_clipboard_title),
+                        onClick = onShareClipboardClick,
+                        compact = compact,
+                    )
+                }
+                Column(
+                    verticalArrangement = Arrangement.Bottom,
+                ) {
+                    ActionButton(
+                        icon = Icons.Rounded.FileOpen,
+                        label = stringResource(R.string.share_files_title),
+                        onClick = onShareFileClick,
+                        compact = compact,
+                    )
 //        ActionButton(iconRes = R.drawable.ic_cloud_upload_wallet, label = "Topup")
-    }
+                }
+            }
+        }
 }
 
 @Composable
@@ -359,7 +382,7 @@ fun ActionButton(
                     indication = null,
                     role = Role.Button,
                     onClick = onClick,
-                ).padding(bottom = 8.dp),
+                ).padding(bottom = 8.dp, start = 20.dp, end = 20.dp, top = 8.dp),
     ) {
         Box(
             modifier =

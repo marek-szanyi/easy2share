@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2026 Eaxor llc.
+ * SPDX-License-Identifier: MIT
+ * Licensed under the MIT License. See LICENSE file in the project root for full license information.
+ */
 package com.eaxor.easy2share.presentation.onboarding
 
 import androidx.annotation.StringRes
@@ -21,8 +26,8 @@ import javax.inject.Inject
  * the screen. This keeps the ViewModel free of UI-toolkit types.
  */
 enum class WelcomeIllustration {
-    PHONE_TO_PC,
-    WIRELESS_SYNC,
+    FILE_PRESS,
+    ENCRYPTION_GATE,
 }
 
 /**
@@ -34,6 +39,7 @@ data class WelcomePage(
     @StringRes val kicker: Int,
     @StringRes val title: Int,
     @StringRes val body: Int,
+    @StringRes val frameTitle: Int,
     val illustration: WelcomeIllustration,
 )
 
@@ -44,7 +50,6 @@ data class WelcomeUiState(
     val pages: List<WelcomePage> = emptyList(),
     val currentPageIndex: Int = 0,
 ) {
-
     /** True when the user is viewing the final page of the story. */
     val isLastPage: Boolean
         get() = pages.isNotEmpty() && currentPageIndex == pages.lastIndex
@@ -54,20 +59,23 @@ data class WelcomeUiState(
  * The onboarding story shown on the first run. Owned by the ViewModel layer, so the
  * View never decides *what* content is presented, only how to draw it.
  */
-internal val welcomePages: List<WelcomePage> = listOf(
-    WelcomePage(
-        kicker = R.string.welcome_1_kicker,
-        title = R.string.welcome_1_title,
-        body = R.string.welcome_1_body,
-        illustration = WelcomeIllustration.PHONE_TO_PC,
-    ),
-    WelcomePage(
-        kicker = R.string.welcome_2_kicker,
-        title = R.string.welcome_2_title,
-        body = R.string.welcome_2_body,
-        illustration = WelcomeIllustration.WIRELESS_SYNC,
-    ),
-)
+internal val welcomePages: List<WelcomePage> =
+    listOf(
+        WelcomePage(
+            kicker = R.string.welcome_1_kicker,
+            title = R.string.welcome_1_title,
+            body = R.string.welcome_1_body,
+            frameTitle = R.string.what,
+            illustration = WelcomeIllustration.FILE_PRESS,
+        ),
+        WelcomePage(
+            kicker = R.string.welcome_2_kicker,
+            title = R.string.welcome_2_title,
+            body = R.string.welcome_2_body,
+            frameTitle = R.string.how,
+            illustration = WelcomeIllustration.ENCRYPTION_GATE,
+        ),
+    )
 
 /**
  * ViewModel for the welcome / onboarding flow.
@@ -80,28 +88,29 @@ internal val welcomePages: List<WelcomePage> = listOf(
  * domain and manages the coroutine scope.
  */
 @HiltViewModel
-class WelcomeViewModel @Inject constructor(
-    private val completeOnboardingUseCase: CompleteOnboardingUseCase,
-) : ViewModel() {
+class WelcomeViewModel
+    @Inject
+    constructor(
+        private val completeOnboardingUseCase: CompleteOnboardingUseCase,
+    ) : ViewModel() {
+        private val _uiState = MutableStateFlow(WelcomeUiState(pages = welcomePages))
+        val uiState: StateFlow<WelcomeUiState> = _uiState.asStateFlow()
 
-    private val _uiState = MutableStateFlow(WelcomeUiState(pages = welcomePages))
-    val uiState: StateFlow<WelcomeUiState> = _uiState.asStateFlow()
+        /** Invoked when the pager settles on [pageIndex], mirroring it into state. */
+        fun onPageShown(pageIndex: Int) {
+            _uiState.update { state ->
+                if (state.pages.isEmpty()) {
+                    state
+                } else {
+                    state.copy(currentPageIndex = pageIndex.coerceIn(0, state.pages.lastIndex))
+                }
+            }
+        }
 
-    /** Invoked when the pager settles on [pageIndex], mirroring it into state. */
-    fun onPageShown(pageIndex: Int) {
-        _uiState.update { state ->
-            if (state.pages.isEmpty()) {
-                state
-            } else {
-                state.copy(currentPageIndex = pageIndex.coerceIn(0, state.pages.lastIndex))
+        /** Invoked when the user skips or reaches the end of the welcome flow. */
+        fun completeOnboarding() {
+            viewModelScope.launch {
+                completeOnboardingUseCase()
             }
         }
     }
-
-    /** Invoked when the user skips or reaches the end of the welcome flow. */
-    fun completeOnboarding() {
-        viewModelScope.launch {
-            completeOnboardingUseCase()
-        }
-    }
-}
