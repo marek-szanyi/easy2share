@@ -1,12 +1,20 @@
 package com.eaxor.easy2share.presentation.home
 
 import android.annotation.SuppressLint
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,30 +27,46 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.FileOpen
+import androidx.compose.material.icons.rounded.Share
+import androidx.compose.material.icons.sharp.OpenInBrowser
+import androidx.compose.material.icons.sharp.Wifi
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.eaxor.easy2share.R
+import com.eaxor.easy2share.ui.theme.DarkOnSurface
 import com.eaxor.easy2share.ui.theme.Easy2shareTheme
 import com.eaxor.easy2share.ui.theme.LightBackground
-import com.eaxor.easy2share.ui.theme.LightOnSurfaceVariant
-import com.eaxor.easy2share.ui.theme.LightOutline
+import com.eaxor.easy2share.ui.theme.LightSurface
 import com.eaxor.easy2share.ui.theme.LightSurfaceDim
 import com.eaxor.easy2share.ui.theme.LightWidgetDarkBlue
 import com.eaxor.easy2share.ui.theme.LightWidgetLightBlue
@@ -54,31 +78,87 @@ fun HomeScreen(
     Scaffold(
         bottomBar = { BottomNavigationBar() }
     ) { paddingValues ->
-        LazyColumn(
+        BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(LightBackground),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 24.dp)
+                .background(LightBackground)
         ) {
-            item {
-                Header(modifier = Modifier.padding(horizontal = 5.dp, vertical = 5.dp))
+            val isCompactHeight = maxHeight < 600.dp
+            val useHorizontalLayout = maxWidth > maxHeight || maxWidth >= 600.dp
+            val horizontalPadding = when {
+                maxWidth < 360.dp -> 12.dp
+                maxWidth < 600.dp -> 16.dp
+                else -> 24.dp
             }
-            item {
-                CreditCard(modifier = Modifier.padding(horizontal = 24.dp))
-            }
-            item {
-                ActionButtonsRow(modifier = Modifier.padding(horizontal = 24.dp, vertical = 24.dp))
-            }
-            item {
-                TransactionHeader(modifier = Modifier.padding(horizontal = 24.dp, vertical = 4.dp))
-            }
-            items(sampleTransactions) { transaction ->
-                TransactionItem(transaction = transaction, modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp))
+
+            Column(modifier = Modifier.fillMaxSize()) {
+                if (!isCompactHeight) {
+                    Header(modifier = Modifier.padding(horizontal = 5.dp, vertical = 5.dp))
+                }
+
+                if (useHorizontalLayout) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = horizontalPadding),
+                        horizontalArrangement = Arrangement.spacedBy(horizontalPadding),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        CreditCard(
+                            compact = isCompactHeight,
+                            modifier = Modifier.weight(2f)
+                        )
+                        ActionButtonsRow(
+                            compact = isCompactHeight,
+                            modifier = Modifier.weight(1f),
+                            onShareClipboardClick = { /*TODO*/ },
+                            onShareFileClick = { /*TODO*/ }
+                        )
+                    }
+                } else {
+                    CreditCard(
+                        compact = isCompactHeight,
+                        modifier = Modifier.padding(horizontal = horizontalPadding)
+                    )
+                    ActionButtonsRow(
+                        compact = isCompactHeight,
+                        modifier = Modifier.padding(
+                            horizontal = horizontalPadding,
+                            vertical = if (isCompactHeight) 8.dp else 24.dp
+                        )
+                    )
+                }
+
+                TransactionHeader(
+                    modifier = Modifier.padding(
+                        horizontal = horizontalPadding,
+                        vertical = 4.dp
+                    )
+                )
+
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    contentPadding = PaddingValues(bottom = 24.dp)
+                ) {
+                    items(sampleTransactions) { transaction ->
+                        TransactionItem(
+                            transaction = transaction,
+                            modifier = Modifier.padding(
+                                horizontal = horizontalPadding,
+                                vertical = 8.dp
+                            )
+                        )
+                    }
+                }
             }
         }
     }
 }
+
+val contentPadding = 24.dp
 
 @Composable
 fun Header(modifier: Modifier = Modifier) {
@@ -86,11 +166,17 @@ fun Header(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun CreditCard(modifier: Modifier = Modifier) {
+fun CreditCard(
+    modifier: Modifier = Modifier,
+    compact: Boolean = false
+) {
+    val cardHeight = if (compact) 180.dp else 200.dp
+
+
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .height(200.dp),
+            .height(cardHeight),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent)
     ) {
@@ -105,71 +191,97 @@ fun CreditCard(modifier: Modifier = Modifier) {
                         )
                     )
                 )
-                .padding(24.dp)
+                .padding(contentPadding)
         ) {
             // Background Map Placeholder (Assuming it's an image or complex drawing, using a simple color block for now or omitting as it's complex)
             // A realistic implementation would use a subtle background image here.
             
             Column(
                 modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.SpaceBetween
+                verticalArrangement = Arrangement.SpaceAround
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp), // Increased bottom padding
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = if (compact) 4.dp else 8.dp),
+                    horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_sim_card), // Replace with actual sim chip icon if available
-                        contentDescription = "Chip",
-                        tint = Color.White,
-                        modifier = Modifier.size(32.dp)
+                        painter = rememberVectorPainter(Icons.Sharp.OpenInBrowser), //painterResource(id = R.drawable.ic_sim_card), // Replace with actual sim chip icon if available
+                        contentDescription = "Web Browser",
+                        tint = LightSurface,
+                        modifier = Modifier.size(if (compact) 16.dp else 24.dp)
                     )
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_contactless), // Replace with actual wifi/contactless icon
-                        contentDescription = "Contactless",
-                        tint = Color.White.copy(alpha = 0.5f),
-                        modifier = Modifier.size(24.dp)
+                    Text(
+                        text = stringResource(R.string.enter_url_title),
+                        color = LightSurface,
+                        modifier = Modifier.padding(horizontal = 8.dp),
+                        fontSize = if (compact) 10.sp else 12.sp
                     )
                 }
 
                 Text(
-                    text = "4562    1122    4595    7852",
+                    text = "http://192.168.0.25/",
                     color = Color.White,
-                    fontSize = 22.sp,
+                    fontSize = if (compact) 20.sp else 24.sp,
                     fontWeight = FontWeight.Medium,
-                    letterSpacing = 2.sp
-                )
+                    letterSpacing = if (compact) 1.sp else 2.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp)
 
-                Text(
-                    text = "AR Jonson",
-                    color = Color.White.copy(alpha = 0.8f),
-                    fontSize = 14.sp
+
                 )
+                Spacer(modifier.size(5.dp) )
+//                Text(
+//                    text = "AR Jonson",
+//                    color = Color.White.copy(alpha = 0.8f),
+//                    fontSize = if (compact) 12.sp else 14.sp
+//                )
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.Bottom
                 ) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
-                        Column {
-                            Text(text = "Expiry Date", color = Color.White.copy(alpha = 0.8f), fontSize = 10.sp)
-                            Text(text = "24/2000", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                    Row() {
+                        Column(verticalArrangement = Arrangement.Bottom) {
+                            Text(
+                                text = "AUTH PIN",
+                                color = Color.White.copy(alpha = 0.8f),
+                                fontSize = 10.sp,
+                                lineHeight = (if (compact) 12.sp else 14.sp)
+                            )
+                            Text(
+                                text = "854652",
+                                color = Color.White,
+                                fontSize = if (compact) 12.sp else 14.sp,
+                                letterSpacing = if (compact) 4.sp else 8.sp,
+                                fontWeight = FontWeight.Medium
+                            )
                         }
-                        Column {
-                            Text(text = "CVV", color = Color.White.copy(alpha = 0.8f), fontSize = 10.sp)
-                            Text(text = "6986", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Medium)
-                        }
+//                        Column {
+//                            Text(text = "CVV", color = Color.White.copy(alpha = 0.8f), fontSize = 10.sp)
+//                            Text(
+//                                text = "6986",
+//                                color = Color.White,
+//                                fontSize = if (compact) 12.sp else 14.sp,
+//                                fontWeight = FontWeight.Medium
+//                            )
+//                        }
                     }
                     
                     // Mastercard Logo Placeholder
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                       Box(modifier = Modifier.width(36.dp).height(20.dp)) {
-                           Box(modifier = Modifier.size(20.dp).align(Alignment.CenterStart).background(Color(0xFFEB001B), CircleShape))
-                           Box(modifier = Modifier.size(20.dp).align(Alignment.CenterEnd).background(Color(0xFFF79E1B), CircleShape))
-                       }
-                       Text(text = "Mastercard", color = Color.White, fontSize = 10.sp, modifier = Modifier.padding(top = 4.dp))
+                        Icon(
+                            painter = rememberVectorPainter(Icons.Sharp.Wifi), //painterResource(id = R.drawable.ic_sim_card), // Replace with actual sim chip icon if available
+                            contentDescription = "Wifi",
+                            tint = LightSurface,
+                            modifier = Modifier.size(if (compact) 24.dp else 32.dp)
+                        )
+                      // Text(text = "Mastercard", color = Color.White, fontSize = 10.sp, modifier = Modifier.padding(top = 4.dp))
                     }
                 }
             }
@@ -178,41 +290,85 @@ fun CreditCard(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun ActionButtonsRow(modifier: Modifier = Modifier) {
+fun ActionButtonsRow(
+    modifier: Modifier = Modifier,
+    onShareClipboardClick: () -> Unit = {},
+    onShareFileClick: () -> Unit = {},
+    compact: Boolean = false
+) {
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
 //        ActionButton(iconRes = R.drawable.ic_arrow_up_wallet, label = "Sent")
-        ActionButton(iconRes = R.drawable.ic_arrow_down_wallet, label = "Receive")
-        ActionButton(iconRes = R.drawable.ic_dollar_wallet, label = "Loan")
+        ActionButton(
+            icon = Icons.Rounded.Share,
+            label = stringResource(R.string.share_clipboard_title),
+            onClick = onShareClipboardClick,
+            compact = compact
+        )
+        ActionButton(
+            icon = Icons.Rounded.FileOpen,
+            label = stringResource(R.string.share_files_title),
+            onClick = onShareFileClick,
+            compact = compact
+        )
 //        ActionButton(iconRes = R.drawable.ic_cloud_upload_wallet, label = "Topup")
     }
 }
 
 @Composable
-fun ActionButton(iconRes: Int, label: String, modifier: Modifier = Modifier) {
+fun ActionButton(
+    icon: ImageVector,
+    label: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    compact: Boolean = false
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.92f else 1f,
+        label = "actionButtonScale"
+    )
+    val backgroundColor by animateColorAsState(
+        targetValue = if (isPressed) LightWidgetDarkBlue else LightWidgetLightBlue,
+        label = "actionButtonBackground"
+    )
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier.padding(bottom = 8.dp) // Added padding to avoid cutout
+        modifier = modifier
+            .scale(scale)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                role = Role.Button,
+                onClick = onClick
+            )
+            .padding(bottom = 8.dp)
     ) {
         Box(
             modifier = Modifier
-                .size(60.dp)
-                .background(LightWidgetLightBlue, CircleShape)
+                .size(if (compact) 52.dp else 60.dp)
+                .background(backgroundColor, CircleShape)
                 .border(1.dp, LightWidgetDarkBlue, CircleShape),
 
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                painter = painterResource(id = iconRes),
+                painter = rememberVectorPainter( icon),
                 contentDescription = label,
                 tint = Color(0xFFFFFFFF),
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(if (compact) 22.dp else 24.dp)
             )
         }
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(text = label, color = Color(0xFF1E2022), fontSize = 16.sp)
+        Spacer(modifier = Modifier.height(if (compact) 4.dp else 8.dp))
+        Text(
+            text = label,
+            color = Color(0xFF1E2022),
+            fontSize = if (compact) 14.sp else 16.sp
+        )
     }
 }
 
@@ -292,39 +448,131 @@ fun TransactionItem(transaction: Transaction, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun BottomNavigationBar(modifier: Modifier = Modifier) {
+fun BottomNavigationBar(
+    modifier: Modifier = Modifier,
+    onHomeClick: () -> Unit = {},
+    onCardsClick: () -> Unit = {},
+    onStatisticsClick: () -> Unit = {},
+    onSettingsClick: () -> Unit = {}
+) {
+    var selectedIndex by rememberSaveable { mutableIntStateOf(0) }
+
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(Color(0xFFF8F9FA))
-            .padding(vertical = 12.dp),
+            .background(
+                brush = Brush.sweepGradient(
+                    colors = listOf(
+                        Color(LightWidgetLightBlue.value),
+                        Color(LightWidgetDarkBlue.value)
+
+                    ),
+                    center = Offset(0.0f,5f)
+                )
+            )
+            .padding(vertical = 10.dp, horizontal = contentPadding),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        BottomNavItem(iconRes = R.drawable.ic_home_wallet, label = "Home", isSelected = true)
-        BottomNavItem(iconRes = R.drawable.ic_wallet_wallet, label = "My Cards", isSelected = false)
-        BottomNavItem(iconRes = R.drawable.ic_pie_chart_wallet, label = "Statistics", isSelected = false)
-        BottomNavItem(iconRes = R.drawable.ic_settings_wallet, label = "Settings", isSelected = false)
+        BottomNavItem(
+            iconRes = R.drawable.ic_home_wallet,
+            label = "Home",
+            isSelected = selectedIndex == 0,
+            onClick = {
+                selectedIndex = 0
+                onHomeClick()
+            },
+            modifier = Modifier.weight(1f)
+        )
+        BottomNavItem(
+            iconRes = R.drawable.ic_wallet_wallet,
+            label = "My Cards",
+            isSelected = selectedIndex == 1,
+            onClick = {
+                selectedIndex = 1
+                onCardsClick()
+            },
+            modifier = Modifier.weight(1f)
+        )
+//        BottomNavItem(
+//            iconRes = R.drawable.ic_pie_chart_wallet,
+//            label = "Statistics",
+//            isSelected = selectedIndex == 2,
+//            onClick = {
+//                selectedIndex = 2
+//                onStatisticsClick()
+//            },
+//            modifier = Modifier.weight(1f)
+//        )
+        BottomNavItem(
+            iconRes = R.drawable.ic_settings_wallet,
+            label = "Settings",
+            isSelected = selectedIndex == 3,
+            onClick = {
+                selectedIndex = 3
+                onSettingsClick()
+            },
+            modifier = Modifier.weight(1f)
+        )
     }
 }
 
 @Composable
-fun BottomNavItem(iconRes: Int, label: String, isSelected: Boolean, modifier: Modifier = Modifier) {
+fun BottomNavItem(
+    iconRes: Int,
+    label: String,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.9f else 1f,
+        label = "bottomNavItemScale"
+    )
+    val containerColor by animateColorAsState(
+        targetValue = when {
+            isPressed -> Color.White.copy(alpha = 0.9f)
+            isSelected -> LightSurfaceDim
+            else -> Color.Transparent
+        },
+        label = "bottomNavItemContainer"
+    )
+    val contentColor by animateColorAsState(
+        targetValue = if (isSelected || isPressed) LightWidgetDarkBlue
+        else DarkOnSurface.copy(alpha = 0.8f),
+        label = "bottomNavItemContent"
+    )
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier.padding(bottom = 8.dp) // Added padding to avoid cutout
+        modifier = modifier
+            .scale(scale)
+            .clip(RoundedCornerShape(20.dp))
+            .background(containerColor)
+            .selectable(
+                selected = isSelected,
+                interactionSource = interactionSource,
+                indication = null,
+                role = Role.Tab,
+                onClick = onClick
+            )
+            .padding(horizontal = 8.dp, vertical = 8.dp)
     ) {
         Icon(
             painter = painterResource(id = iconRes),
             contentDescription = label,
-            tint = if (isSelected) Color(0xFF1E3A8A) else Color(0xFF4A5568),
-            modifier = Modifier.size(24.dp)
+            tint = contentColor,
+            modifier = Modifier.size(if (isSelected) 26.dp else 24.dp)
         )
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(2.dp))
         Text(
             text = label,
-            fontSize = 12.sp,
-            color = if (isSelected) Color(0xFF1E3A8A) else Color(0xFF4A5568)
+            fontSize = if (isSelected) 13.sp else 12.sp,
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+            color = contentColor,
+            maxLines = 1
         )
     }
 }

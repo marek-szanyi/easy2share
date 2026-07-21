@@ -29,4 +29,7 @@
     <string name="ready_to_share">READY TO SHARE</string>
     <string name="awaiting_authentications">AWAITING CLIENT(s)</string>
     <string name="not_sharing">NOT SHARING</string>
+    <string name="enter_url_title">Enter the following URL into a web browser on PC</string>
+    <string name="share_clipboard_title">Share Clipboard\n</string>
+    <string name="share_files_title">Share File</string>
 </resources>
