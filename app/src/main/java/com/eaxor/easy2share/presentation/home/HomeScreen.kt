@@ -5,11 +5,10 @@
  */
 package com.eaxor.easy2share.presentation.home
 
-import android.annotation.SuppressLint
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
+import androidx.annotation.StringRes
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -17,33 +16,31 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.FileOpen
 import androidx.compose.material.icons.rounded.Share
-import androidx.compose.material.icons.sharp.OpenInBrowser
-import androidx.compose.material.icons.sharp.Wifi
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material.icons.sharp.Devices
+import androidx.compose.material.icons.sharp.Home
+import androidx.compose.material.icons.sharp.Settings
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -52,625 +49,779 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.eaxor.easy2share.R
-import com.eaxor.easy2share.ui.theme.DarkOnSurface
+import com.eaxor.easy2share.presentation.components.BrutalistBackdrop
+import com.eaxor.easy2share.presentation.components.HazardStripe
 import com.eaxor.easy2share.ui.theme.Easy2shareTheme
-import com.eaxor.easy2share.ui.theme.LightBackground
-import com.eaxor.easy2share.ui.theme.LightSurface
-import com.eaxor.easy2share.ui.theme.LightSurfaceDim
-import com.eaxor.easy2share.ui.theme.LightWidgetDarkBlue
-import com.eaxor.easy2share.ui.theme.LightWidgetLightBlue
+import com.eaxor.easy2share.ui.theme.HazardYellow
+import com.eaxor.easy2share.ui.theme.IndustrialInk
+import com.eaxor.easy2share.ui.theme.IndustrialPaper
 
 @Composable
-fun HomeScreen(viewModel: HomeViewModel) {
-    Scaffold(
-        bottomBar = { BottomNavigationBar() },
-    ) { paddingValues ->
-        BoxWithConstraints(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .background(LightBackground),
-        ) {
-            val isCompactHeight = maxHeight < 600.dp
-            val useHorizontalLayout = maxWidth > maxHeight || maxWidth >= 600.dp
-            val horizontalPadding =
-                when {
-                    maxWidth < 360.dp -> 12.dp
-                    maxWidth < 600.dp -> 16.dp
-                    else -> 24.dp
-                }
-
-            Column(modifier = Modifier.fillMaxSize()) {
-                if (!isCompactHeight) {
-                    Header(modifier = Modifier.padding(horizontal =0.dp, vertical = 5.dp))
-                }
-
-                if (useHorizontalLayout) {
-                    Row(
-                        modifier =
-                            Modifier
-                                .fillMaxWidth(),
-
-                        horizontalArrangement = Arrangement.spacedBy(horizontalPadding),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        CreditCard(
-                            compact = isCompactHeight,
-                            modifier = Modifier.weight(2f),
-                        )
-                        ActionButtonsRow(
-                            compact = isCompactHeight,
-                            modifier = Modifier.weight(1f),
-                            onShareClipboardClick = { /*TODO*/ },
-                            onShareFileClick = { /*TODO*/ },
-                        )
-                    }
-                } else {
-                    CreditCard(
-                        compact = isCompactHeight,
-
-                    )
-                    ActionButtonsRow(
-                        compact = isCompactHeight,
-                        modifier =
-                            Modifier.padding(
-                               //vertical = if (isCompactHeight) 8.dp else 24.dp,
-                            ),
-                    )
-                }
-
-
-                LazyColumn(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
-                    //contentPadding = PaddingValues(bottom = 24.dp),
-                ) {
-                    items(sampleTransactions) { transaction ->
-                        TransactionItem(
-                            transaction = transaction,
-                            modifier =
-                                Modifier.padding(
-                                    horizontal = horizontalPadding,
-                                    vertical = 8.dp,
-                                ),
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-val contentPadding = 24.dp
-
-@Composable
-fun Header(modifier: Modifier = Modifier) {
-//    Spacer(modifier = modifier.height(1.dp))
-}
-
-@Composable
-fun CreditCard(
+fun HomeScreen(
+    viewModel: HomeViewModel,
     modifier: Modifier = Modifier,
-    compact: Boolean = false,
 ) {
-    val cardHeight = if (compact) 180.dp else 200.dp
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    Card(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .height(cardHeight),
-        shape = RoundedCornerShape( 0.dp, 0.dp, 0.dp, .0.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-        border = BorderStroke(2.dp, LightWidgetDarkBlue)
-    ) {
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .background(
-                        brush =
-                            Brush.linearGradient(
-                                colors =
-                                    listOf(
-                                        Color(LightWidgetDarkBlue.value), // Dark blue
-                                        Color(LightWidgetLightBlue.value), // Slightly lighter blue
-                                    ),
-                            ),
-                    ).padding(contentPadding),
-        ) {
-            // Background Map Placeholder (Assuming it's an image or complex drawing, using a simple
-            // color block for now or omitting as it's complex)
-            // A realistic implementation would use a subtle background image here.
-
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.SpaceAround,
-            ) {
-                Row(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = if (compact) 4.dp else 8.dp),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Icon(
-                        painter = rememberVectorPainter(Icons.Sharp.OpenInBrowser),
-                        contentDescription = "Web Browser",
-                        tint = LightSurface,
-                        modifier = Modifier.size(if (compact) 16.dp else 24.dp),
-                    )
-                    Text(
-                        text = stringResource(R.string.enter_url_title),
-                        color = LightSurface,
-                        modifier = Modifier.padding(horizontal = 8.dp),
-                        fontSize = if (compact) 11.sp else 13.sp,
-                    )
-                }
-
-                Text(
-                    text = "http://192.168.0.25/",
-                    color = Color.White,
-                    fontSize = if (compact) 24.sp else 28.sp,
-                    fontWeight = FontWeight.Medium,
-                    letterSpacing = if (compact) 1.sp else 2.sp,
-                    textAlign = TextAlign.Center,
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 8.dp),
-                )
-                Spacer(modifier.size(5.dp))
-//                Text(
-//                    text = "AR Jonson",
-//                    color = Color.White.copy(alpha = 0.8f),
-//                    fontSize = if (compact) 12.sp else 14.sp
-//                )
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Bottom,
-                ) {
-                    Row {
-                        Column(verticalArrangement = Arrangement.Bottom) {
-                            Text(
-                                text = "AUTH PIN",
-                                color = Color.White.copy(alpha = 0.8f),
-                                fontSize = 10.sp,
-                                lineHeight = (if (compact) 12.sp else 14.sp),
-                            )
-                            Text(
-                                text = "854652",
-                                color = Color.White,
-                                fontSize = if (compact) 12.sp else 14.sp,
-                                letterSpacing = if (compact) 4.sp else 8.sp,
-                                fontWeight = FontWeight.Medium,
-                            )
-                        }
-//                        Column {
-//                            Text(text = "CVV", color = Color.White.copy(alpha = 0.8f), fontSize = 10.sp)
-//                            Text(
-//                                text = "6986",
-//                                color = Color.White,
-//                                fontSize = if (compact) 12.sp else 14.sp,
-//                                fontWeight = FontWeight.Medium
-//                            )
-//                        }
-                    }
-
-                    // Mastercard Logo Placeholder
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(
-                            painter = rememberVectorPainter(Icons.Sharp.Wifi),
-                            contentDescription = "Wifi",
-                            tint = LightSurface,
-                            modifier = Modifier.size(if (compact) 24.dp else 32.dp),
-                        )
-                        // Text(text = "Mastercard", color = Color.White, fontSize = 10.sp, modifier = Modifier.padding(top = 4.dp))
-                    }
-                }
-            }
-        }
-    }
+    HomeScreen(
+        uiState = uiState,
+        modifier = modifier,
+    )
 }
 
 @Composable
-fun ActionButtonsRow(
+fun HomeScreen(
+    uiState: HomeUiState,
     modifier: Modifier = Modifier,
     onShareClipboardClick: () -> Unit = {},
     onShareFileClick: () -> Unit = {},
-    compact: Boolean = false,
 ) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceEvenly,
-    ) {
+    val connectedClients = uiState.connectedClients()
 
-            Box(
+    Box(modifier = modifier.fillMaxSize()) {
+        BrutalistBackdrop(modifier = Modifier.fillMaxSize())
+
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .systemBarsPadding(),
+        ) {
+            HomeHeader(
+                status = uiState.statusLabel(),
                 modifier =
                     Modifier
-                        .fillMaxHeight(0.2f)
                         .fillMaxWidth()
-                        .background(
-                            brush =
-                                Brush.verticalGradient(
-                                    colors =
-                                        listOf(
-                                            Color(LightSurface.value), // Dark blue
-                                            Color(DarkOnSurface.value), // Slightly lighter blue
-                                        ),
-                                ),
-                        ),
-                contentAlignment = Alignment.Center,
+                        .padding(horizontal = 20.dp, vertical = 12.dp),
+            )
+
+            LazyColumn(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                Column(
-                    verticalArrangement = Arrangement.Bottom,
-                ) {
-//        ActionButton(iconRes = R.drawable.ic_arrow_up_wallet, label = "Sent")
-                    ActionButton(
-                        icon = Icons.Rounded.Share,
-                        label = stringResource(R.string.share_clipboard_title),
-                        onClick = onShareClipboardClick,
-                        compact = compact,
+                item {
+                    ServerLinkPanel(
+                        address = uiState.serverAddress(),
+                        authPin = uiState.authPin(),
+                        status = uiState.statusLabel(),
+                        clientCount = connectedClients.size,
+                        shouldAnimate = uiState is HomeUiState.ServerRunning,
+                        detail = (uiState as? HomeUiState.Error)?.message,
                     )
                 }
-                Column(
-                    verticalArrangement = Arrangement.Bottom,
-                ) {
-                    ActionButton(
-                        icon = Icons.Rounded.FileOpen,
-                        label = stringResource(R.string.share_files_title),
-                        onClick = onShareFileClick,
-                        compact = compact,
+
+                item {
+                    HomeActions(
+                        onShareClipboardClick = onShareClipboardClick,
+                        onShareFileClick = onShareFileClick,
                     )
-//        ActionButton(iconRes = R.drawable.ic_cloud_upload_wallet, label = "Topup")
+                }
+
+                item {
+                    ClientListHeader(clientCount = connectedClients.size)
+                }
+
+                if (connectedClients.isEmpty()) {
+                    item {
+                        EmptyClientsPanel()
+                    }
+                } else {
+                    itemsIndexed(
+                        items = connectedClients,
+                        key = { _, client -> client.id },
+                    ) { index, client ->
+                        ConnectedClientItem(
+                            index = index,
+                            client = client,
+                        )
+                    }
                 }
             }
+
+            HomeBottomNavigation()
         }
+    }
 }
 
 @Composable
-fun ActionButton(
-    icon: ImageVector,
-    label: String,
-    onClick: () -> Unit,
+private fun HomeHeader(
+    @StringRes status: Int,
     modifier: Modifier = Modifier,
-    compact: Boolean = false,
 ) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-    val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.92f else 1f,
-        label = "actionButtonScale",
-    )
-    val backgroundColor by animateColorAsState(
-        targetValue = if (isPressed) LightWidgetDarkBlue else LightWidgetLightBlue,
-        label = "actionButtonBackground",
-    )
-
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier =
-            modifier
-                .scale(scale)
-                .clickable(
-                    interactionSource = interactionSource,
-                    indication = null,
-                    role = Role.Button,
-                    onClick = onClick,
-                ).padding(bottom = 8.dp, start = 20.dp, end = 20.dp, top = 8.dp),
+    Row(
+        modifier = modifier.heightIn(min = 44.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(
+        Text(
+            text = stringResource(R.string.app_name).uppercase(),
             modifier =
                 Modifier
-                    .size(if (compact) 52.dp else 60.dp)
-                    .background(backgroundColor, CircleShape)
-                    .border(1.dp, LightWidgetDarkBlue, CircleShape),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                painter = rememberVectorPainter(icon),
-                contentDescription = label,
-                tint = Color(0xFFFFFFFF),
-                modifier = Modifier.size(if (compact) 22.dp else 24.dp),
-            )
-        }
-        Spacer(modifier = Modifier.height(if (compact) 4.dp else 8.dp))
-        Text(
-            text = label,
-            color = Color(0xFF1E2022),
-            fontSize = if (compact) 14.sp else 16.sp,
+                    .background(IndustrialInk)
+                    .padding(horizontal = 10.dp, vertical = 7.dp),
+            color = HazardYellow,
+            fontFamily = FontFamily.Monospace,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Black,
+            letterSpacing = 1.5.sp,
         )
-    }
-}
 
-@Composable
-fun TransactionHeader(modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
+        Spacer(Modifier.weight(1f))
+
         Text(
-            text = "Transaction",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFF1E2022),
-        )
-        TextButton(onClick = { /*TODO*/ }) {
-            Text(
-                text = "Sell All",
-                color = Color(0xFF1E3A8A), // Darker Blue color for better contrast
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium,
-            )
-        }
-    }
-}
-
-@Composable
-fun TransactionItem(
-    transaction: Transaction,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Box(
+            text = stringResource(status),
             modifier =
                 Modifier
-                    .size(48.dp)
-                    .background(Color(0xFFF3F4F6), CircleShape),
-            contentAlignment = Alignment.Center,
-        ) {
-            // Use specific icons based on type or use a placeholder
-            if (transaction.iconRes != null) {
-                Icon(
-                    painter = painterResource(id = transaction.iconRes),
-                    contentDescription = transaction.title,
-                    tint = transaction.iconTint ?: Color(0xFF1E2022),
-                    modifier = Modifier.size(24.dp),
-                )
-            } else {
-                Image(
-                    painter = ColorPainter(Color.Gray),
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp).clip(CircleShape),
-                )
-            }
-        }
-        Spacer(modifier = Modifier.width(16.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = transaction.title,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF1E2022),
-            )
-            Text(
-                text = transaction.subtitle,
-                fontSize = 14.sp,
-                color = Color(0xFF4A5568),
-            )
-        }
-        Text(
-            text = transaction.amount,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
-            color = if (transaction.isPositive) Color(0xFF1E3A8A) else Color(0xFF1E2022),
-        )
-    }
-}
-
-@Composable
-fun BottomNavigationBar(
-    modifier: Modifier = Modifier,
-    onHomeClick: () -> Unit = {},
-    onCardsClick: () -> Unit = {},
-    onStatisticsClick: () -> Unit = {},
-    onSettingsClick: () -> Unit = {},
-) {
-    var selectedIndex by rememberSaveable { mutableIntStateOf(0) }
-
-    Row(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .background(
-                    brush =
-                        Brush.sweepGradient(
-                            colors =
-                                listOf(
-                                    Color(LightWidgetLightBlue.value),
-                                    Color(LightWidgetDarkBlue.value),
-                                ),
-                            center = Offset(0.0f, 5f),
-                        ),
-                ).padding(vertical = 10.dp, horizontal = contentPadding),
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        BottomNavItem(
-            iconRes = R.drawable.ic_home_wallet,
-            label = "Home",
-            isSelected = selectedIndex == 0,
-            onClick = {
-                selectedIndex = 0
-                onHomeClick()
-            },
-            modifier = Modifier.weight(1f),
-        )
-        BottomNavItem(
-            iconRes = R.drawable.ic_wallet_wallet,
-            label = "My Cards",
-            isSelected = selectedIndex == 1,
-            onClick = {
-                selectedIndex = 1
-                onCardsClick()
-            },
-            modifier = Modifier.weight(1f),
-        )
-//        BottomNavItem(
-//            iconRes = R.drawable.ic_pie_chart_wallet,
-//            label = "Statistics",
-//            isSelected = selectedIndex == 2,
-//            onClick = {
-//                selectedIndex = 2
-//                onStatisticsClick()
-//            },
-//            modifier = Modifier.weight(1f)
-//        )
-        BottomNavItem(
-            iconRes = R.drawable.ic_settings_wallet,
-            label = "Settings",
-            isSelected = selectedIndex == 3,
-            onClick = {
-                selectedIndex = 3
-                onSettingsClick()
-            },
-            modifier = Modifier.weight(1f),
-        )
-    }
-}
-
-@Composable
-fun BottomNavItem(
-    iconRes: Int,
-    label: String,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-    val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.9f else 1f,
-        label = "bottomNavItemScale",
-    )
-    val containerColor by animateColorAsState(
-        targetValue =
-            when {
-                isPressed -> Color.White.copy(alpha = 0.9f)
-                isSelected -> LightSurfaceDim
-                else -> Color.Transparent
-            },
-        label = "bottomNavItemContainer",
-    )
-    val contentColor by animateColorAsState(
-        targetValue =
-            if (isSelected || isPressed) {
-                LightWidgetDarkBlue
-            } else {
-                DarkOnSurface.copy(alpha = 0.8f)
-            },
-        label = "bottomNavItemContent",
-    )
-
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier =
-            modifier
-                .scale(scale)
-                .clip(RoundedCornerShape(20.dp))
-                .background(containerColor)
-                .selectable(
-                    selected = isSelected,
-                    interactionSource = interactionSource,
-                    indication = null,
-                    role = Role.Tab,
-                    onClick = onClick,
-                ).padding(horizontal = 8.dp, vertical = 8.dp),
-    ) {
-        Icon(
-            painter = painterResource(id = iconRes),
-            contentDescription = label,
-            tint = contentColor,
-            modifier = Modifier.size(if (isSelected) 26.dp else 24.dp),
-        )
-        Spacer(modifier = Modifier.height(2.dp))
-        Text(
-            text = label,
-            fontSize = if (isSelected) 13.sp else 12.sp,
-            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-            color = contentColor,
+                    .background(HazardYellow)
+                    .border(2.dp, IndustrialInk)
+                    .padding(horizontal = 8.dp, vertical = 6.dp),
+            color = IndustrialInk,
+            fontFamily = FontFamily.Monospace,
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Black,
             maxLines = 1,
         )
     }
 }
 
-data class Transaction(
-    val title: String,
-    val subtitle: String,
-    val amount: String,
-    val isPositive: Boolean,
-    val iconRes: Int? = null,
-    val iconTint: Color? = null,
+@Composable
+private fun ServerLinkPanel(
+    address: String,
+    authPin: String,
+    @StringRes status: Int,
+    clientCount: Int,
+    shouldAnimate: Boolean,
+    detail: String?,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .height(236.dp),
+    ) {
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .offset(x = 8.dp, y = 8.dp)
+                    .background(IndustrialInk),
+        )
+
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(end = 8.dp, bottom = 8.dp)
+                    .background(HazardYellow)
+                    .border(4.dp, IndustrialInk),
+        ) {
+            Row(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(42.dp)
+                        .padding(horizontal = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Box(
+                    modifier =
+                        Modifier
+                            .size(10.dp)
+                            .background(IndustrialInk),
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = stringResource(R.string.home_server_link),
+                    color = IndustrialInk,
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 1.5.sp,
+                )
+                Spacer(Modifier.weight(1f))
+                Text(
+                    text = stringResource(status),
+                    modifier =
+                        Modifier
+                            .background(IndustrialInk)
+                            .padding(horizontal = 7.dp, vertical = 3.dp),
+                    color = HazardYellow,
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Black,
+                )
+            }
+
+            Column(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .background(IndustrialPaper)
+                        .border(3.dp, IndustrialInk)
+                        .padding(horizontal = 14.dp, vertical = 12.dp),
+            ) {
+                Text(
+                    text = stringResource(R.string.home_server_address),
+                    color = IndustrialInk,
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 1.5.sp,
+                )
+                Text(
+                    text = address,
+                    color = IndustrialInk,
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Black,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Spacer(Modifier.height(9.dp))
+                Box(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(3.dp)
+                            .background(IndustrialInk),
+                )
+                Spacer(Modifier.height(9.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Bottom,
+                ) {
+                    Column {
+                        Text(
+                            text = stringResource(R.string.home_auth_pin),
+                            color = IndustrialInk,
+                            fontFamily = FontFamily.Monospace,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 1.5.sp,
+                        )
+                        Text(
+                            text = authPin,
+                            color = IndustrialInk,
+                            fontFamily = FontFamily.Monospace,
+                            fontSize = 19.sp,
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 4.sp,
+                        )
+                    }
+
+                    Text(
+                        text = stringResource(R.string.home_client_count, clientCount.twoDigits()),
+                        modifier =
+                            Modifier
+                                .background(HazardYellow)
+                                .border(2.dp, IndustrialInk)
+                                .padding(horizontal = 9.dp, vertical = 5.dp),
+                        color = IndustrialInk,
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Black,
+                    )
+                }
+
+                if (detail != null) {
+                    Spacer(Modifier.height(5.dp))
+                    Text(
+                        text = detail,
+                        color = IndustrialInk,
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 10.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            }
+
+            HazardStripe(
+                shouldBeAnimated = shouldAnimate,
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(20.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun HomeActions(
+    onShareClipboardClick: () -> Unit,
+    onShareFileClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        BrutalistActionButton(
+            icon = Icons.Rounded.Share,
+            label = stringResource(R.string.share_clipboard_title),
+            containerColor = HazardYellow,
+            onClick = onShareClipboardClick,
+            modifier = Modifier.weight(1f),
+        )
+        BrutalistActionButton(
+            icon = Icons.Rounded.FileOpen,
+            label = stringResource(R.string.share_files_title),
+            containerColor = IndustrialPaper,
+            onClick = onShareFileClick,
+            modifier = Modifier.weight(1f),
+        )
+    }
+}
+
+@Composable
+private fun BrutalistActionButton(
+    icon: ImageVector,
+    label: String,
+    containerColor: androidx.compose.ui.graphics.Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val pressOffset by animateDpAsState(
+        targetValue = if (isPressed) 6.dp else 0.dp,
+        animationSpec = tween(durationMillis = 55, easing = LinearEasing),
+        label = "homeActionPressOffset",
+    )
+
+    Box(
+        modifier =
+            modifier
+                .height(104.dp),
+    ) {
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .offset(x = 6.dp, y = 6.dp)
+                    .background(IndustrialInk),
+        )
+        Row(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(end = 6.dp, bottom = 6.dp)
+                    .offset { IntOffset(x = pressOffset.toPx().toInt(), y = pressOffset.toPx().toInt()) }
+                    .background(containerColor)
+                    .border(3.dp, IndustrialInk)
+                    .clickable(
+                        interactionSource = interactionSource,
+                        indication = null,
+                        role = Role.Button,
+                        onClick = onClick,
+                    ).padding(horizontal = 12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(5.dp),
+            ) {
+                Text(
+                    text = label.uppercase(),
+                    color = IndustrialInk,
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Black,
+                    lineHeight = 16.sp,
+                )
+                Box(
+                    modifier =
+                        Modifier
+                            .width(38.dp)
+                            .height(3.dp)
+                            .background(IndustrialInk),
+                )
+            }
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = IndustrialInk,
+                modifier = Modifier.size(30.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun ClientListHeader(
+    clientCount: Int,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = stringResource(R.string.home_connected_clients),
+            color = IndustrialInk,
+            fontFamily = FontFamily.Monospace,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Black,
+            letterSpacing = 1.sp,
+        )
+        Spacer(Modifier.width(10.dp))
+        Spacer(
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .height(3.dp)
+                    .background(IndustrialInk),
+        )
+        Spacer(Modifier.width(10.dp))
+        Text(
+            text = clientCount.twoDigits(),
+            modifier =
+                Modifier
+                    .background(IndustrialInk)
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+            color = HazardYellow,
+            fontFamily = FontFamily.Monospace,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Black,
+        )
+    }
+}
+
+@Composable
+private fun EmptyClientsPanel(modifier: Modifier = Modifier) {
+    Row(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .heightIn(min = 118.dp)
+                .background(IndustrialPaper)
+                .border(3.dp, IndustrialInk),
+    ) {
+        Box(
+            modifier =
+                Modifier
+                    .width(14.dp)
+                    .fillMaxHeight()
+                    .background(HazardYellow),
+        )
+        Column(
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text(
+                text = "// 00",
+                color = IndustrialInk,
+                fontFamily = FontFamily.Monospace,
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Black,
+            )
+            Text(
+                text = stringResource(R.string.home_no_clients),
+                color = IndustrialInk,
+                fontFamily = FontFamily.Monospace,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Black,
+            )
+            Text(
+                text = stringResource(R.string.home_no_clients_body),
+                color = IndustrialInk,
+                fontFamily = FontFamily.Monospace,
+                fontSize = 12.sp,
+                lineHeight = 17.sp,
+            )
+        }
+    }
+}
+
+@Composable
+private fun ConnectedClientItem(
+    index: Int,
+    client: ConnectedClient,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .height(102.dp),
+    ) {
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .offset(x = 6.dp, y = 6.dp)
+                    .background(IndustrialInk),
+        )
+        Row(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(end = 6.dp, bottom = 6.dp)
+                    .background(IndustrialPaper)
+                    .border(3.dp, IndustrialInk)
+                    .padding(10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier =
+                    Modifier
+                        .size(48.dp)
+                        .background(HazardYellow)
+                        .border(2.dp, IndustrialInk),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = (index + 1).twoDigits(),
+                    color = IndustrialInk,
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Black,
+                )
+            }
+            Spacer(Modifier.width(11.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = client.displayName,
+                    color = IndustrialInk,
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Black,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                    text = client.address,
+                    color = IndustrialInk,
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 1,
+                )
+                Text(
+                    text =
+                        stringResource(
+                            R.string.home_client_fingerprint,
+                            client.fingerprint.take(12).uppercase(),
+                        ),
+                    color = IndustrialInk.copy(alpha = 0.72f),
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 10.sp,
+                    maxLines = 1,
+                )
+            }
+            Spacer(Modifier.width(8.dp))
+            Text(
+                text = stringResource(R.string.home_client_secure),
+                modifier =
+                    Modifier
+                        .background(IndustrialInk)
+                        .padding(horizontal = 7.dp, vertical = 5.dp),
+                color = HazardYellow,
+                fontFamily = FontFamily.Monospace,
+                fontSize = 9.sp,
+                fontWeight = FontWeight.Black,
+            )
+        }
+    }
+}
+
+@Composable
+private fun HomeBottomNavigation(modifier: Modifier = Modifier) {
+    var selectedIndex by rememberSaveable { mutableIntStateOf(0) }
+    val items =
+        listOf(
+            HomeNavigationItem(Icons.Sharp.Home, R.string.home_nav_home),
+            HomeNavigationItem(Icons.Sharp.Devices, R.string.home_nav_clients),
+            HomeNavigationItem(Icons.Sharp.Settings, R.string.home_nav_settings),
+        )
+
+    Column(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(IndustrialPaper),
+    ) {
+        HazardStripe(
+            shouldBeAnimated = false,
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(12.dp),
+        )
+        Row(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .border(3.dp, IndustrialInk)
+                    .padding(7.dp),
+            horizontalArrangement = Arrangement.spacedBy(7.dp),
+        ) {
+            items.forEachIndexed { index, item ->
+                HomeBottomNavigationItem(
+                    item = item,
+                    selected = selectedIndex == index,
+                    onClick = { selectedIndex = index },
+                    modifier = Modifier.weight(1f),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun HomeBottomNavigationItem(
+    item: HomeNavigationItem,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val label = stringResource(item.label)
+
+    Row(
+        modifier =
+            modifier
+                .height(48.dp)
+                .background(if (selected) HazardYellow else IndustrialPaper)
+                .border(2.dp, IndustrialInk)
+                .selectable(
+                    selected = selected,
+                    role = Role.Tab,
+                    onClick = onClick,
+                ).padding(horizontal = 8.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            imageVector = item.icon,
+            contentDescription = label,
+            tint = IndustrialInk,
+            modifier = Modifier.size(20.dp),
+        )
+        if (selected) {
+            Spacer(Modifier.width(6.dp))
+            Text(
+                text = label,
+                color = IndustrialInk,
+                fontFamily = FontFamily.Monospace,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Black,
+                maxLines = 1,
+            )
+        }
+    }
+}
+
+private data class HomeNavigationItem(
+    val icon: ImageVector,
+    @StringRes val label: Int,
 )
 
-val sampleTransactions =
+private fun HomeUiState.connectedClients(): List<ConnectedClient> = (this as? HomeUiState.ServerRunning)?.connectedClients.orEmpty()
+
+private fun HomeUiState.serverAddress(): String =
+    when (this) {
+        is HomeUiState.ServerRunning -> {
+            val address =
+                if (serverAddress.startsWith("http://") || serverAddress.startsWith("https://")) {
+                    serverAddress
+                } else {
+                    "http://$serverAddress"
+                }
+            "$address:$serverPort/"
+        }
+
+        else -> {
+            "--"
+        }
+    }
+
+private fun HomeUiState.authPin(): String =
+    when (this) {
+        is HomeUiState.ServerRunning -> authPin ?: "------"
+        is HomeUiState.AwaitingAuthentications -> pin
+        else -> "------"
+    }
+
+@StringRes
+private fun HomeUiState.statusLabel(): Int =
+    when (this) {
+        HomeUiState.Stopped -> R.string.home_status_stopped
+        HomeUiState.PermissionsNeeded -> R.string.home_status_permissions
+        HomeUiState.WifiNotEnabled -> R.string.home_status_wifi
+        is HomeUiState.Error -> R.string.home_status_error
+        is HomeUiState.ServerRunning -> R.string.home_status_running
+        is HomeUiState.AwaitingAuthentications -> R.string.home_status_waiting
+        is HomeUiState.ClipboardSharing -> R.string.home_status_clipboard
+    }
+
+private fun Int.twoDigits(): String = toString().padStart(2, '0')
+
+private val sampleConnectedClients =
     listOf(
-        Transaction(
-            "Apple Store",
-            "Entertainment",
-            "- $5,99",
-            false,
-            R.drawable.ic_apple_wallet,
+        ConnectedClient(
+            id = "studio-pc",
+            displayName = "STUDIO-PC",
+            address = "192.168.0.14",
+            fingerprint = "A9F2-7C31-18D4",
         ),
-        Transaction(
-            "Spotify",
-            "Music",
-            "- $12,99",
-            false,
-            R.drawable.ic_spotify_wallet,
-            Color(0xFF14853A),
-        ),
-        Transaction(
-            "Money Transfer",
-            "Transaction",
-            "$300",
-            true,
-            R.drawable.ic_download_wallet,
-            Color(0xFF1E2022),
-        ),
-        Transaction(
-            "Grocery",
-            "Shopping",
-            "- $88",
-            false,
-            R.drawable.ic_cart_wallet,
+        ConnectedClient(
+            id = "workstation",
+            displayName = "WORKSTATION-02",
+            address = "192.168.0.23",
+            fingerprint = "74B1-0E6A-993C",
         ),
     )
 
-@SuppressLint("ViewModelConstructorInComposable")
-@Preview(showBackground = true, device = "id:pixel_10_pro")
+@Preview(showBackground = true, widthDp = 411, heightDp = 891)
 @Composable
-fun HomeScreenPreview() {
-    Easy2shareTheme {
+private fun HomeScreenPreview() {
+    Easy2shareTheme(darkTheme = false) {
         HomeScreen(
-            viewModel = HomeViewModel(),
+            uiState =
+                HomeUiState.ServerRunning(
+                    serverAddress = "192.168.0.25",
+                    serverPort = 8080,
+                    authPin = "854652",
+                    connectedClients = sampleConnectedClients,
+                ),
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 411, heightDp = 891, name = "Empty clients")
+@Composable
+private fun EmptyHomeScreenPreview() {
+    Easy2shareTheme(darkTheme = false) {
+        HomeScreen(
+            uiState =
+                HomeUiState.ServerRunning(
+                    serverAddress = "192.168.0.25",
+                    serverPort = 8080,
+                    authPin = "854652",
+                ),
         )
     }
 }

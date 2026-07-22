@@ -18,6 +18,7 @@ accompanist = "0.37.3"
 runtime = "1.11.4"
 material3Version = "1.4.0"
 spotless = "8.8.0"
+leakcanary = "1.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -47,6 +48,7 @@ accompanist-permissions = { group = 'com.google.accompanist', name = 'accompanis
 androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime", version.ref = "runtime" }
 androidx-material-icons-extended = { group = 'androidx.compose.material', name = 'material-icons-extended' }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3Version" }
+leakcanary = { group = "com.android.tools.studio.leakcanary", name = "leakcanary", version.ref = "leakcanary" }
 
 
 [plugins]

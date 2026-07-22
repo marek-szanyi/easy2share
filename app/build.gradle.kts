@@ -62,6 +62,7 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.accompanist.permissions)
+    debugImplementation(libs.leakcanary)
 
     ksp(libs.hilt.compiler)
     testImplementation(libs.junit)

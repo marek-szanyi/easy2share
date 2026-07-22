@@ -31,8 +31,29 @@
     <string name="awaiting_authentications">AWAITING CLIENT(s)</string>
     <string name="not_sharing">NOT SHARING</string>
     <string name="enter_url_title">Enter the following URL into a web browser on PC</string>
-    <string name="share_clipboard_title">Share Clipboard\n</string>
+    <string name="share_clipboard_title">Share Clipboard</string>
     <string name="share_files_title">Share File</string>
     <string name="what">what?</string>
     <string name="how">"How? "</string>
+
+    <!-- Home -->
+    <string name="home_server_link">SERVER LINK</string>
+    <string name="home_server_address">SERVER ADDRESS</string>
+    <string name="home_auth_pin">AUTH PIN</string>
+    <string name="home_status_running">SHARING ON</string>
+    <string name="home_status_stopped">NOT SHARING</string>
+    <string name="home_status_permissions">PERMISSIONS REQUIRED</string>
+    <string name="home_status_wifi">WIFI REQUIRED</string>
+    <string name="home_status_waiting">AWAITING CLIENTS</string>
+    <string name="home_status_error">SYSTEM ERROR</string>
+    <string name="home_status_clipboard">CLIPBOARD READY</string>
+    <string name="home_connected_clients">CONNECTED CLIENTS</string>
+    <string name="home_client_count">CLIENTS // %1$s</string>
+    <string name="home_no_clients">NO CLIENTS CONNECTED</string>
+    <string name="home_no_clients_body">Open the server address on another device to establish a secure link.</string>
+    <string name="home_client_secure">SECURE</string>
+    <string name="home_client_fingerprint">FP %1$s</string>
+    <string name="home_nav_home">HOME</string>
+    <string name="home_nav_clients">CLIENTS</string>
+    <string name="home_nav_settings">SETTINGS</string>
 </resources>
