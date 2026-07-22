@@ -13,11 +13,6 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.ReadOnlyComposable
-import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme =
@@ -54,45 +49,6 @@ private val LightColorScheme =
         outline = LightOutline,
     )
 
-/**
- * App-specific colours that have no equivalent Material role — currently the
- * onboarding aurora backdrop. Provided through the theme so every screen reads
- * them the same way as the standard [androidx.compose.material3.ColorScheme].
- */
-@Immutable
-data class ExtendedColors(
-    val auroraTop: Color,
-    val auroraBottom: Color,
-    val auroraBlobViolet: Color,
-    val auroraBlobTeal: Color,
-)
-
-private val LightExtendedColors =
-    ExtendedColors(
-        auroraTop = LightSurface,
-        auroraBottom = LightBackground,
-        auroraBlobViolet = BrandTealDeep,
-        auroraBlobTeal = LightSurfaceDim,
-    )
-
-private val DarkExtendedColors =
-    ExtendedColors(
-        auroraTop = DarkSurfaceDim,
-        auroraBottom = DarkBackground,
-        auroraBlobViolet = BrandIndigo,
-        auroraBlobTeal = DarkSurfaceDim,
-    )
-
-private val LocalExtendedColors = staticCompositionLocalOf { LightExtendedColors }
-
-/** Accessor for app colours that extend the Material [MaterialTheme] palette. */
-object Easy2shareColors {
-    val extended: ExtendedColors
-        @Composable
-        @ReadOnlyComposable
-        get() = LocalExtendedColors.current
-}
-
 @Composable
 fun Easy2shareTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
@@ -103,7 +59,7 @@ fun Easy2shareTheme(
 ) {
     val colorScheme =
         when {
-            dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+            dynamicColor -> {
                 val context = LocalContext.current
                 if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
             }
@@ -116,13 +72,9 @@ fun Easy2shareTheme(
                 LightColorScheme
             }
         }
-    val extendedColors = if (darkTheme) DarkExtendedColors else LightExtendedColors
-
-    CompositionLocalProvider(LocalExtendedColors provides extendedColors) {
-        MaterialTheme(
-            colorScheme = colorScheme,
-            typography = Typography,
-            content = content,
-        )
-    }
+    MaterialTheme(
+        colorScheme = colorScheme,
+        typography = Typography,
+        content = content,
+    )
 }

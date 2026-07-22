@@ -1,5 +1,12 @@
+/*
+ * Copyright (c) 2026 Eaxor llc.
+ * SPDX-License-Identifier: MIT
+ * Licensed under the MIT License. See LICENSE file in the project root for full license information.
+ */
 package com.eaxor.easy2share.presentation.onboarding
 
+import android.graphics.Paint
+import android.graphics.Typeface
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -9,263 +16,403 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.rotate
-import kotlin.math.PI
-import kotlin.math.cos
-import kotlin.math.sin
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.toArgb
 
 /**
- * Section 1 illustration — a wire-frame phone streaming glowing "content packets"
- * along a curved beam into a desktop monitor. Purely drawn with [Canvas], no assets.
+ * Section 1 illustration — file cards ride a conveyor into a mechanical press,
+ * receive a hard SENT stamp, and exit as completed work.
  */
 @Composable
-fun PhoneToPcIllustration(
+fun IndustrialFilePressIllustration(
     accent: Color,
     accentSecondary: Color,
+    paper: Color,
     modifier: Modifier = Modifier,
 ) {
-    val transition = rememberInfiniteTransition(label = "phoneToPc")
-    val flow by transition.animateFloat(
+    val sentLabel = androidx.compose.ui.res.stringResource(com.eaxor.easy2share.R.string.welcome_sent_stamp)
+    val stampPaint =
+        remember(sentLabel, accent) {
+            Paint().apply {
+                color = accent.toArgb()
+                textAlign = Paint.Align.CENTER
+                typeface = Typeface.create(Typeface.MONOSPACE, Typeface.BOLD)
+            }
+        }
+    val transition = rememberInfiniteTransition(label = "industrialFilePress")
+    val cycle by transition.animateFloat(
         initialValue = 0f,
         targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 2600, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart,
-        ),
-        label = "flow",
-    )
-    val pulse by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 2200, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart,
-        ),
-        label = "pulse",
+        animationSpec =
+            infiniteRepeatable(
+                animation = tween(durationMillis = 2100, easing = LinearEasing),
+                repeatMode = RepeatMode.Restart,
+            ),
+        label = "filePressCycle",
     )
 
     Canvas(modifier = modifier) {
         val w = size.width
         val h = size.height
-        val centerY = h * 0.5f
+        val beltTop = h * 0.72f
+        val beltHeight = h * 0.15f
+        val beltInset = h * 0.025f
+        val fileWidth = w * 0.20f
+        val fileHeight = h * 0.20f
+        val fileY = beltTop - fileHeight + beltInset
+        val pressFileX = (w - fileWidth) / 2f
+        val fileX =
+            when {
+                cycle < 0.32f -> lerpValue(-fileWidth, pressFileX, cycle / 0.32f)
+                cycle < 0.58f -> pressFileX
+                else -> lerpValue(pressFileX, w + fileWidth, (cycle - 0.58f) / 0.42f)
+            }
+        val pressProgress =
+            when {
+                cycle < 0.32f -> 0f
+                cycle < 0.40f -> (cycle - 0.32f) / 0.08f
+                cycle < 0.51f -> 1f
+                cycle < 0.59f -> 1f - ((cycle - 0.51f) / 0.08f)
+                else -> 0f
+            }
+        val stamped = cycle >= 0.40f
 
-        // --- Device geometry ---------------------------------------------------
-        val phoneW = w * 0.17f
-        val phoneH = phoneW * 2.02f
-        val phoneTopLeft = Offset(w * 0.15f, centerY + (centerY * 1f/5f))
-
-        val monitorW = w * 0.35f
-        val monitorH = monitorW * 0.59f
-        val monitorTopLeft = Offset(w - monitorW - w * 0.15f, centerY *  1f/3f) //+ monitorH / 0.5f - h * 0.03f)
-
-        val start = Offset(phoneTopLeft.x + phoneW, phoneTopLeft.y- 0.5f)
-        val end = Offset(monitorTopLeft.x, monitorTopLeft.y + monitorH / 2f)
-        val control = Offset((start.x + end.x) / 2f, centerY - h * 0.20f)
-
-        // --- Beam --------------------------------------------------------------
-        val beam = Path().apply {
-            moveTo(start.x, start.y)
-            quadraticTo(control.x, control.y, end.x, end.y)
-        }
-        drawPath(
-            path = beam,
-            color = accent.copy(alpha = 0.16f),
-            style = Stroke(width = w * 0.02f),
-        )
-        drawPath(
-            path = beam,
-            color = accent.copy(alpha = 0.30f),
-            style = Stroke(width = w * 0.006f),
-        )
-
-        // --- Source pulse rings around the phone ------------------------------
-        repeat(3) { i ->
-            val p = ((pulse + i / 3f) % 1f)
-            drawCircle(
-                color = accent.copy(alpha = (1f - p) * 0.35f),
-                radius = phoneW * (0.4f + p * 1.4f),
-                center = start,
-                style = Stroke(width = w * 0.004f),
-            )
-        }
-
-        // --- Flowing content packets ------------------------------------------
-        val packetCount = 4
-        repeat(packetCount) { i ->
-            val t = ((flow + i.toFloat() / packetCount) % 1f)
-            val pos = quadraticPoint(start, control, end, t)
-            // fade in at the start, fade out near the monitor
-            val alpha = (sin(t * PI).toFloat()).coerceIn(0f, 1f)
-            val packet = size.minDimension * 0.045f
-            val col = lerpColor(accentSecondary, accent, t)
-            // glow
-            drawCircle(
-                color = col.copy(alpha = 0.20f * alpha),
-                radius = packet * 2.1f,
-                center = pos,
-            )
-            drawRoundRect(
-                color = col.copy(alpha = alpha),
-                topLeft = Offset(pos.x - packet / 2f, pos.y - packet / 2f),
-                size = Size(packet, packet),
-                cornerRadius = CornerRadius(packet * 0.32f, packet * 0.32f),
-            )
-        }
-
-        // --- Phone -------------------------------------------------------------
-        drawDevice(
-            topLeft = phoneTopLeft,
-            deviceSize = Size(phoneW, phoneH),
-            cornerFraction = 0.22f,
-            accent = accent,
-            glow = accentSecondary,
-            strokeWidth = w * 0.010f,
-        )
-        // phone camera notch
-        drawCircle(
-            color = accent.copy(alpha = 0.7f),
-            radius = phoneW * 0.05f,
-            center = Offset(phoneTopLeft.x + phoneW / 2f, phoneTopLeft.y + phoneH * 0.06f),
-        )
-
-        // --- Monitor -----------------------------------------------------------
-        drawDevice(
-            topLeft = monitorTopLeft,
-            deviceSize = Size(monitorW, monitorH),
-            cornerFraction = 0.10f,
-            accent = accent,
-            glow = accentSecondary,
-            strokeWidth = w * 0.010f,
-        )
-        // monitor stand
-        val standTop = monitorTopLeft.y + monitorH
-        drawLine(
+        // Conveyor body and moving registration blocks.
+        drawRect(
             color = accent,
-            start = Offset(monitorTopLeft.x + monitorW / 2f, standTop),
-            end = Offset(monitorTopLeft.x + monitorW / 2f, standTop + monitorH * 0.22f),
-            strokeWidth = w * 0.012f,
+            topLeft = Offset(0f, beltTop),
+            size = Size(w, beltHeight),
         )
-        drawLine(
+        drawRect(
+            color = accentSecondary,
+            topLeft = Offset(0f, beltTop + beltInset),
+            size = Size(w, beltHeight - beltInset * 2f),
+        )
+        val markerSpacing = w * 0.12f
+        val markerWidth = w * 0.035f
+        val markerOffset = (cycle * markerSpacing * 8f) % markerSpacing
+        var markerX = -markerSpacing + markerOffset
+        while (markerX < w) {
+            drawRect(
+                color = accent,
+                topLeft = Offset(markerX, beltTop + beltHeight * 0.36f),
+                size = Size(markerWidth, beltHeight * 0.28f),
+            )
+            markerX += markerSpacing
+        }
+
+        // Press frame.
+        val frameLeft = w * 0.28f
+        val frameRight = w * 0.72f
+        val frameTop = h * 0.12f
+        val columnWidth = w * 0.065f
+        drawRect(
             color = accent,
-            start = Offset(monitorTopLeft.x + monitorW * 0.30f, standTop + monitorH * 0.22f),
-            end = Offset(monitorTopLeft.x + monitorW * 0.70f, standTop + monitorH * 0.22f),
-            strokeWidth = w * 0.012f,
+            topLeft = Offset(frameLeft, frameTop),
+            size = Size(frameRight - frameLeft, h * 0.16f),
         )
-        // received "arrival" flash inside the monitor
-        val arrival = (sin((flow) * 2f * PI).toFloat()).coerceIn(0f, 1f)
-        drawRoundRect(
-            color = accent.copy(alpha = 0.10f + 0.22f * arrival),
-            topLeft = Offset(monitorTopLeft.x + monitorW * 0.14f, monitorTopLeft.y + monitorH * 0.2f),
-            size = Size(monitorW * 0.72f, monitorH * 0.6f),
-            cornerRadius = CornerRadius(monitorW * 0.04f, monitorW * 0.04f),
+        repeat(3) { index ->
+            drawRect(
+                color = accentSecondary,
+                topLeft = Offset(frameLeft + w * (0.055f + index * 0.105f), frameTop + h * 0.055f),
+                size = Size(w * 0.045f, h * 0.045f),
+            )
+        }
+        drawRect(
+            color = accent,
+            topLeft = Offset(frameLeft, frameTop),
+            size = Size(columnWidth, beltTop - frameTop),
         )
+        drawRect(
+            color = accent,
+            topLeft = Offset(frameRight - columnWidth, frameTop),
+            size = Size(columnWidth, beltTop - frameTop),
+        )
+        drawRect(
+            color = accentSecondary,
+            topLeft = Offset(frameLeft + w * 0.018f, frameTop + h * 0.20f),
+            size = Size(columnWidth - w * 0.036f, beltTop - frameTop - h * 0.25f),
+        )
+        drawRect(
+            color = accentSecondary,
+            topLeft = Offset(frameRight - columnWidth + w * 0.018f, frameTop + h * 0.20f),
+            size = Size(columnWidth - w * 0.036f, beltTop - frameTop - h * 0.25f),
+        )
+
+        // File card moving through the press.
+        drawRect(
+            color = paper,
+            topLeft = Offset(fileX, fileY),
+            size = Size(fileWidth, fileHeight),
+        )
+        drawRect(
+            color = accent,
+            topLeft = Offset(fileX, fileY),
+            size = Size(fileWidth, fileHeight),
+            style = Stroke(width = w * 0.009f),
+        )
+        val foldSize = fileWidth * 0.22f
+        val fold =
+            Path().apply {
+                moveTo(fileX + fileWidth - foldSize, fileY)
+                lineTo(fileX + fileWidth, fileY + foldSize)
+                lineTo(fileX + fileWidth - foldSize, fileY + foldSize)
+                close()
+            }
+        drawPath(path = fold, color = accentSecondary)
+        repeat(2) { index ->
+            drawRect(
+                color = accent,
+                topLeft = Offset(fileX + fileWidth * 0.14f, fileY + fileHeight * (0.22f + index * 0.17f)),
+                size = Size(fileWidth * 0.48f, h * 0.018f),
+            )
+        }
+        if (stamped) {
+            val stampLeft = fileX + fileWidth * 0.10f
+            val stampTop = fileY + fileHeight * 0.57f
+            val stampWidth = fileWidth * 0.80f
+            val stampHeight = fileHeight * 0.28f
+            drawRect(
+                color = accentSecondary,
+                topLeft = Offset(stampLeft, stampTop),
+                size = Size(stampWidth, stampHeight),
+            )
+            drawRect(
+                color = accent,
+                topLeft = Offset(stampLeft, stampTop),
+                size = Size(stampWidth, stampHeight),
+                style = Stroke(width = w * 0.007f),
+            )
+            stampPaint.textSize = stampHeight * 0.62f
+            drawContext.canvas.nativeCanvas.drawText(
+                sentLabel,
+                stampLeft + stampWidth / 2f,
+                stampTop + stampHeight * 0.72f,
+                stampPaint,
+            )
+        }
+
+        // Ram and platen strike after the file reaches the center.
+        val ramCenter = w * 0.5f
+        val platenRestY = h * 0.36f
+        val platenY = platenRestY + pressProgress * h * 0.14f
+        drawRect(
+            color = accent,
+            topLeft = Offset(ramCenter - w * 0.035f, frameTop + h * 0.12f),
+            size = Size(w * 0.07f, platenY - frameTop - h * 0.10f),
+        )
+        drawRect(
+            color = accent,
+            topLeft = Offset(ramCenter - w * 0.15f, platenY),
+            size = Size(w * 0.30f, h * 0.065f),
+        )
+        drawRect(
+            color = accentSecondary,
+            topLeft = Offset(ramCenter - w * 0.12f, platenY + h * 0.018f),
+            size = Size(w * 0.24f, h * 0.025f),
+        )
+
+        if (pressProgress > 0.9f) {
+            repeat(3) { index ->
+                val blockY = fileY + h * (0.02f + index * 0.055f)
+                drawRect(
+                    color = accent,
+                    topLeft = Offset(frameLeft - w * (0.07f + index * 0.025f), blockY),
+                    size = Size(w * 0.045f, h * 0.025f),
+                )
+                drawRect(
+                    color = accent,
+                    topLeft = Offset(frameRight + w * (0.025f + index * 0.025f), blockY),
+                    size = Size(w * 0.045f, h * 0.025f),
+                )
+            }
+        }
     }
 }
 
 /**
- * Section 2 illustration — two devices bridged by expanding wireless rings with a
- * rotating two-way sync glyph in the center, communicating a secure live link.
+ * Section 2 illustration — opposing payloads cross a central encryption gate,
+ * disappear into cipher channels, and emerge verified on the other side.
  */
 @Composable
-fun WirelessSyncIllustration(
+fun EncryptionGateIllustration(
     accent: Color,
     accentSecondary: Color,
+    paper: Color,
     modifier: Modifier = Modifier,
 ) {
-    val transition = rememberInfiniteTransition(label = "wirelessSync")
-    val wave by transition.animateFloat(
+    val transition = rememberInfiniteTransition(label = "encryptionGate")
+    val cycle by transition.animateFloat(
         initialValue = 0f,
         targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 2800, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart,
-        ),
-        label = "wave",
-    )
-    val spin by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 5200, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart,
-        ),
-        label = "spin",
+        animationSpec =
+            infiniteRepeatable(
+                animation = tween(durationMillis = 1800, easing = LinearEasing),
+                repeatMode = RepeatMode.Restart,
+            ),
+        label = "encryptionCycle",
     )
 
     Canvas(modifier = modifier) {
         val w = size.width
         val h = size.height
-        val center = Offset(w * 0.5f, h * 0.5f)
+        val topLaneY = h * 0.33f
+        val bottomLaneY = h * 0.68f
+        val laneWidth = h * 0.025f
+        val packetWidth = w * 0.18f
+        val packetHeight = h * 0.16f
+        val gateLeft = w * 0.37f
+        val gateWidth = w * 0.26f
+        val gateTop = h * 0.10f
+        val gateHeight = h * 0.80f
 
-        val phoneW = w * 0.15f
-        val phoneH = phoneW * 2.0f
-        val phoneTopLeft = Offset(w * 0.08f, center.y - phoneH / 2f)
+        // Bidirectional rails and moving registration marks.
+        drawRect(
+            color = accent,
+            topLeft = Offset(0f, topLaneY - laneWidth / 2f),
+            size = Size(w, laneWidth),
+        )
+        drawRect(
+            color = accent,
+            topLeft = Offset(0f, bottomLaneY - laneWidth / 2f),
+            size = Size(w, laneWidth),
+        )
+        val markerSpacing = w * 0.13f
+        val markerOffset = (cycle * markerSpacing * 7f) % markerSpacing
+        var markerX = -markerSpacing + markerOffset
+        while (markerX < w) {
+            drawRect(
+                color = accentSecondary,
+                topLeft = Offset(markerX, topLaneY - h * 0.03f),
+                size = Size(w * 0.035f, h * 0.06f),
+            )
+            drawRect(
+                color = accentSecondary,
+                topLeft = Offset(w - markerX - w * 0.035f, bottomLaneY - h * 0.03f),
+                size = Size(w * 0.035f, h * 0.06f),
+            )
+            markerX += markerSpacing
+        }
 
-        val laptopW = w * 0.30f
-        val laptopH = laptopW * 0.60f
-        val laptopTopLeft = Offset(w * 0.62f, center.y - laptopH / 2f)
+        // Payloads pass in opposite directions and gain verification marks
+        // after crossing the center of the gate.
+        val topPacketX = lerpValue(-packetWidth, w, cycle)
+        val bottomPacketX = lerpValue(w, -packetWidth, cycle)
+        val verified = cycle >= 0.60f
+        drawSecurePacket(
+            topLeft = Offset(topPacketX, topLaneY - packetHeight / 2f),
+            packetSize = Size(packetWidth, packetHeight),
+            accent = accent,
+            fill = if (verified) accentSecondary else paper,
+            verified = verified,
+        )
+        drawSecurePacket(
+            topLeft = Offset(bottomPacketX, bottomLaneY - packetHeight / 2f),
+            packetSize = Size(packetWidth, packetHeight),
+            accent = accent,
+            fill = if (verified) accentSecondary else paper,
+            verified = verified,
+        )
 
-        // --- Expanding connection rings from the centre -----------------------
-        repeat(4) { i ->
-            val p = ((wave + i / 4f) % 1f)
-            drawCircle(
-                color = lerpColor(accent, accentSecondary, p).copy(alpha = (1f - p) * 0.45f),
-                radius = w * 0.06f + p * w * 0.34f,
-                center = center,
-                style = Stroke(width = w * 0.005f),
+        // Heavy gate body hides each payload while the cipher channels process it.
+        drawRect(
+            color = accent,
+            topLeft = Offset(gateLeft, gateTop),
+            size = Size(gateWidth, gateHeight),
+        )
+        drawRect(
+            color = accentSecondary,
+            topLeft = Offset(gateLeft + w * 0.025f, gateTop + h * 0.035f),
+            size = Size(gateWidth - w * 0.05f, h * 0.06f),
+        )
+        drawRect(
+            color = accentSecondary,
+            topLeft = Offset(gateLeft + w * 0.025f, gateTop + gateHeight - h * 0.095f),
+            size = Size(gateWidth - w * 0.05f, h * 0.06f),
+        )
+
+        val channelHeight = packetHeight + h * 0.045f
+        val cipherPhase = (cycle * 12f).toInt()
+        listOf(topLaneY, bottomLaneY).forEachIndexed { laneIndex, laneY ->
+            val channelTop = laneY - channelHeight / 2f
+            drawRect(
+                color = paper,
+                topLeft = Offset(gateLeft, channelTop),
+                size = Size(gateWidth, channelHeight),
+            )
+            drawRect(
+                color = accentSecondary,
+                topLeft = Offset(gateLeft, channelTop),
+                size = Size(gateWidth, channelHeight),
+                style = Stroke(width = w * 0.009f),
+            )
+            val cellWidth = gateWidth / 5f
+            repeat(5) { cell ->
+                val active = (cell + cipherPhase + laneIndex) % 2 == 0
+                drawRect(
+                    color = if (active) accent else accentSecondary,
+                    topLeft =
+                        Offset(
+                            gateLeft + cell * cellWidth + w * 0.012f,
+                            channelTop + channelHeight * 0.30f,
+                        ),
+                    size = Size(cellWidth - w * 0.024f, channelHeight * 0.40f),
+                )
+            }
+            val scannerX = gateLeft + (cycle * 2f % 1f) * gateWidth
+            drawRect(
+                color = accent,
+                topLeft = Offset(scannerX, channelTop),
+                size = Size(w * 0.012f, channelHeight),
             )
         }
 
-        // --- Devices -----------------------------------------------------------
-        drawDevice(
-            topLeft = phoneTopLeft,
-            deviceSize = Size(phoneW, phoneH),
-            cornerFraction = 0.22f,
-            accent = accent,
-            glow = accentSecondary,
-            strokeWidth = w * 0.010f,
+        // Central lock flashes during the verification window.
+        val lockCenterX = w * 0.5f
+        val lockCenterY = h * 0.505f
+        val verificationActive = cycle in 0.43f..0.60f
+        val lockColor = if (verificationActive) paper else accentSecondary
+        drawArc(
+            color = lockColor,
+            startAngle = 180f,
+            sweepAngle = 180f,
+            useCenter = false,
+            topLeft = Offset(lockCenterX - w * 0.045f, lockCenterY - h * 0.095f),
+            size = Size(w * 0.09f, h * 0.13f),
+            style = Stroke(width = w * 0.018f),
         )
-        drawDevice(
-            topLeft = laptopTopLeft,
-            deviceSize = Size(laptopW, laptopH),
-            cornerFraction = 0.10f,
-            accent = accent,
-            glow = accentSecondary,
-            strokeWidth = w * 0.010f,
+        drawRect(
+            color = lockColor,
+            topLeft = Offset(lockCenterX - w * 0.065f, lockCenterY - h * 0.015f),
+            size = Size(w * 0.13f, h * 0.12f),
         )
-        // laptop base
-        drawLine(
+        drawRect(
             color = accent,
-            start = Offset(laptopTopLeft.x - laptopW * 0.08f, laptopTopLeft.y + laptopH),
-            end = Offset(laptopTopLeft.x + laptopW * 1.08f, laptopTopLeft.y + laptopH),
-            strokeWidth = w * 0.014f,
+            topLeft = Offset(lockCenterX - w * 0.012f, lockCenterY + h * 0.018f),
+            size = Size(w * 0.024f, h * 0.05f),
         )
-
-        // --- Central hub glow --------------------------------------------------
-        drawCircle(
-            color = accentSecondary.copy(alpha = 0.18f),
-            radius = w * 0.11f,
-            center = center,
-        )
-        drawCircle(
-            color = accent.copy(alpha = 0.9f),
-            radius = w * 0.075f,
-            center = center,
-            style = Stroke(width = w * 0.006f),
-        )
-
-        // --- Rotating two-way sync arrows -------------------------------------
-        val r = w * 0.05f
-        rotate(degrees = spin, pivot = center) {
-            drawSyncArrows(center = center, radius = r, color = accent, strokeWidth = w * 0.010f)
+        if (verificationActive) {
+            repeat(2) { index ->
+                val distance = w * (0.095f + index * 0.035f)
+                drawRect(
+                    color = accentSecondary,
+                    topLeft = Offset(lockCenterX - distance, lockCenterY + h * 0.02f),
+                    size = Size(w * 0.025f, h * 0.035f),
+                )
+                drawRect(
+                    color = accentSecondary,
+                    topLeft = Offset(lockCenterX + distance - w * 0.025f, lockCenterY + h * 0.02f),
+                    size = Size(w * 0.025f, h * 0.035f),
+                )
+            }
         }
     }
 }
@@ -274,109 +421,61 @@ fun WirelessSyncIllustration(
 //  Drawing helpers
 // --------------------------------------------------------------------------
 
-private fun DrawScope.drawDevice(
+private fun DrawScope.drawSecurePacket(
     topLeft: Offset,
-    deviceSize: Size,
-    cornerFraction: Float,
+    packetSize: Size,
     accent: Color,
-    glow: Color,
-    strokeWidth: Float,
+    fill: Color,
+    verified: Boolean,
 ) {
-    val corner = CornerRadius(
-        deviceSize.minDimension * cornerFraction,
-        deviceSize.minDimension * cornerFraction,
-    )
-    // soft outer glow
-    drawRoundRect(
-        color = glow.copy(alpha = 0.18f),
-        topLeft = Offset(topLeft.x - strokeWidth * 1.5f, topLeft.y - strokeWidth * 1.5f),
-        size = Size(deviceSize.width + strokeWidth * 3f, deviceSize.height + strokeWidth * 3f),
-        cornerRadius = corner,
-    )
-    // subtle screen fill
-    drawRoundRect(
-        color = accent.copy(alpha = 0.06f),
+    drawRect(
+        color = fill,
         topLeft = topLeft,
-        size = deviceSize,
-        cornerRadius = corner,
+        size = packetSize,
     )
-    // wire-frame outline
-    drawRoundRect(
+    drawRect(
         color = accent,
         topLeft = topLeft,
-        size = deviceSize,
-        cornerRadius = corner,
-        style = Stroke(width = strokeWidth),
+        size = packetSize,
+        style = Stroke(width = packetSize.width * 0.05f),
     )
+    repeat(3) { index ->
+        drawRect(
+            color = accent,
+            topLeft =
+                Offset(
+                    topLeft.x + packetSize.width * 0.12f,
+                    topLeft.y + packetSize.height * (0.18f + index * 0.18f),
+                ),
+            size = Size(packetSize.width * 0.42f, packetSize.height * 0.08f),
+        )
+    }
+    if (verified) {
+        val check =
+            Path().apply {
+                moveTo(
+                    topLeft.x + packetSize.width * 0.62f,
+                    topLeft.y + packetSize.height * 0.54f,
+                )
+                lineTo(
+                    topLeft.x + packetSize.width * 0.72f,
+                    topLeft.y + packetSize.height * 0.68f,
+                )
+                lineTo(
+                    topLeft.x + packetSize.width * 0.89f,
+                    topLeft.y + packetSize.height * 0.30f,
+                )
+            }
+        drawPath(
+            path = check,
+            color = accent,
+            style = Stroke(width = packetSize.width * 0.06f),
+        )
+    }
 }
 
-private fun DrawScope.drawSyncArrows(
-    center: Offset,
-    radius: Float,
-    color: Color,
-    strokeWidth: Float,
-) {
-    // Two opposing arcs forming a circular "sync" glyph.
-    val arcSize = Size(radius * 2f, radius * 2f)
-    val arcTopLeft = Offset(center.x - radius, center.y - radius)
-    drawArc(
-        color = color,
-        startAngle = 20f,
-        sweepAngle = 140f,
-        useCenter = false,
-        topLeft = arcTopLeft,
-        size = arcSize,
-        style = Stroke(width = strokeWidth),
-    )
-    drawArc(
-        color = color,
-        startAngle = 200f,
-        sweepAngle = 140f,
-        useCenter = false,
-        topLeft = arcTopLeft,
-        size = arcSize,
-        style = Stroke(width = strokeWidth),
-    )
-    // arrow heads at each arc tip
-    drawArrowHead(center, radius, 20f, color, strokeWidth)
-    drawArrowHead(center, radius, 200f, color, strokeWidth)
-}
-
-private fun DrawScope.drawArrowHead(
-    center: Offset,
-    radius: Float,
-    angleDeg: Float,
-    color: Color,
-    strokeWidth: Float,
-) {
-    val a = angleDeg * PI.toFloat() / 180f
-    val tip = Offset(center.x + radius * cos(a), center.y + radius * sin(a))
-    val len = radius * 0.5f
-    drawLine(
-        color = color,
-        start = tip,
-        end = Offset(tip.x - len * cos(a - 0.6f), tip.y - len * sin(a - 0.6f)),
-        strokeWidth = strokeWidth,
-    )
-    drawLine(
-        color = color,
-        start = tip,
-        end = Offset(tip.x - len * cos(a + 0.6f), tip.y - len * sin(a + 0.6f)),
-        strokeWidth = strokeWidth,
-    )
-}
-
-private fun quadraticPoint(p0: Offset, c: Offset, p1: Offset, t: Float): Offset {
-    val u = 1f - t
-    val x = u * u * p0.x + 2f * u * t * c.x + t * t * p1.x
-    val y = u * u * p0.y + 2f * u * t * c.y + t * t * p1.y
-    return Offset(x, y)
-}
-
-private fun lerpColor(a: Color, b: Color, t: Float): Color = Color(
-    red = a.red + (b.red - a.red) * t,
-    green = a.green + (b.green - a.green) * t,
-    blue = a.blue + (b.blue - a.blue) * t,
-    alpha = a.alpha + (b.alpha - a.alpha) * t,
-)
-
+private fun lerpValue(
+    start: Float,
+    end: Float,
+    progress: Float,
+): Float = start + (end - start) * progress.coerceIn(0f, 1f)

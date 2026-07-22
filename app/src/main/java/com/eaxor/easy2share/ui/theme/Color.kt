@@ -11,8 +11,8 @@ import androidx.compose.ui.graphics.Color
 //  Application palette
 //
 //  Single source of truth for every colour in the app. Screens must never
-//  hardcode `Color(0x...)`; they consume these through [Easy2shareTheme] via
-//  `MaterialTheme.colorScheme` and [Easy2shareColors.extended].
+//  hardcode `Color(0x...)`; they consume named values from this palette directly
+//  or through `MaterialTheme.colorScheme`.
 //
 //  Brand accents are intentionally muted — roughly 35% less saturated than their
 //  vivid originals — and every on-* colour clears WCAG AA contrast on its surface.
@@ -27,6 +27,11 @@ val BrandTealDeep = Color(0xFF18A9E7)
 
 /** High-contrast content colour that sits on top of any brand accent. */
 val OnAccent = Color(0xFF5E5E5E)
+
+// --- Industrial onboarding ---------------------------------------------------
+val HazardYellow = Color(0xFFFFD600)
+val IndustrialInk = Color(0xFF111111)
+val IndustrialPaper = Color(0xFFF2F0E8)
 
 // --- Light surfaces & content ------------------------------------------------
 val LightBackground = Color(0xF0F5F6F6)
