@@ -13,7 +13,7 @@
 
     <string name="welcome_2_kicker">STAY IN SYNC</string>
     <string name="welcome_2_title">Secure Wireless Link</string>
-    <string name="welcome_2_body">Your phone and PC talk over encrypted connection. It\'s safe to share even passwords!</string>
+    <string name="welcome_2_body">Your phone and PC talk over an encrypted connection. It\'s safe to share even passwords!</string>
     <string name="cd_settings">Settings</string>
     <string name="dialog_permission_title">Permission Needed</string>
     <string name="dialog_permission_message">The app functionality requires permissions</string>
