@@ -56,5 +56,5 @@
     <string name="home_nav_home">HOME</string>
     <string name="home_nav_clients">CLIENTS</string>
     <string name="home_nav_settings">SETTINGS</string>
-    <string name="scan_qr_code">"Scan QR code "</string>
+    <string name="scan_qr_code">Scan QR code</string>
 </resources>
