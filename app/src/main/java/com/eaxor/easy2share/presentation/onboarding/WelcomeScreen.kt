@@ -415,14 +415,8 @@ private fun PageIllustration(
 ) {
     when (illustration) {
         WelcomeIllustration.FILE_PRESS -> {
-//            IndustrialFilePressIllustration(
-//                accent = IndustrialInk,
-//                accentSecondary = HazardYellow,
-//                paper = IndustrialPaper,
-//                modifier = modifier,
-//            )
             Text(
-                text = "Easily share clipboard & Files",
+                text = stringResource(R.string.welcome_message),
                 color = IndustrialInk,
                 fontFamily = FontFamily.Default,
                 fontWeight = FontWeight.Black,
