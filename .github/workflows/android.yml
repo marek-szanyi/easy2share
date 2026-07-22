@@ -13,16 +13,16 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: set up JDK 11
+    - name: set up JDK 21
       uses: actions/setup-java@v4
       with:
-        java-version: '11'
+        java-version: '21'
         distribution: 'temurin'
         cache: gradle
 
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
-    - name: Android Github Action
-      # You may pin to the exact commit or the version.
-      # uses: vukan-markovic/Github-Android-Action@c02d4964929a1f88ec1e72041055264bcd8b92e7
-      uses: vukan-markovic/Github-Android-Action@1.2
+    - name: Android Build
+        # You may pin to the exact commit or the version.
+        # uses: vgaidarji/android-github-actions-build@0888eff41ad409a802aa4ccd7790a91891da9056
+      uses: vgaidarji/android-github-actions-build@v1.0.1
