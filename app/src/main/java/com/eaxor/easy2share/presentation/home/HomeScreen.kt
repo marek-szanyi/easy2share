@@ -30,11 +30,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.FileOpen
+import androidx.compose.material.icons.rounded.QrCode
 import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material.icons.sharp.Devices
 import androidx.compose.material.icons.sharp.Home
@@ -87,6 +89,7 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     onShareClipboardClick: () -> Unit = {},
     onShareFileClick: () -> Unit = {},
+    onScanQrClick: () -> Unit = {},
 ) {
     val connectedClients = uiState.connectedClients()
 
@@ -99,20 +102,12 @@ fun HomeScreen(
                     .fillMaxSize()
                     .systemBarsPadding(),
         ) {
-            HomeHeader(
-                status = uiState.statusLabel(),
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 12.dp),
-            )
-
             LazyColumn(
                 modifier =
                     Modifier
                         .fillMaxWidth()
                         .weight(1f),
-                contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 20.dp),
+                contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 20.dp, bottom = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 item {
@@ -120,7 +115,6 @@ fun HomeScreen(
                         address = uiState.serverAddress(),
                         authPin = uiState.authPin(),
                         status = uiState.statusLabel(),
-                        clientCount = connectedClients.size,
                         shouldAnimate = uiState is HomeUiState.ServerRunning,
                         detail = (uiState as? HomeUiState.Error)?.message,
                     )
@@ -130,6 +124,7 @@ fun HomeScreen(
                     HomeActions(
                         onShareClipboardClick = onShareClipboardClick,
                         onShareFileClick = onShareFileClick,
+                        onScanQrClick = onScanQrClick,
                     )
                 }
 
@@ -160,51 +155,10 @@ fun HomeScreen(
 }
 
 @Composable
-private fun HomeHeader(
-    @StringRes status: Int,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier = modifier.heightIn(min = 44.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = stringResource(R.string.app_name).uppercase(),
-            modifier =
-                Modifier
-                    .background(IndustrialInk)
-                    .padding(horizontal = 10.dp, vertical = 7.dp),
-            color = HazardYellow,
-            fontFamily = FontFamily.Monospace,
-            fontSize = 13.sp,
-            fontWeight = FontWeight.Black,
-            letterSpacing = 1.5.sp,
-        )
-
-        Spacer(Modifier.weight(1f))
-
-        Text(
-            text = stringResource(status),
-            modifier =
-                Modifier
-                    .background(HazardYellow)
-                    .border(2.dp, IndustrialInk)
-                    .padding(horizontal = 8.dp, vertical = 6.dp),
-            color = IndustrialInk,
-            fontFamily = FontFamily.Monospace,
-            fontSize = 10.sp,
-            fontWeight = FontWeight.Black,
-            maxLines = 1,
-        )
-    }
-}
-
-@Composable
 private fun ServerLinkPanel(
     address: String,
     authPin: String,
     @StringRes status: Int,
-    clientCount: Int,
     shouldAnimate: Boolean,
     detail: String?,
     modifier: Modifier = Modifier,
@@ -212,8 +166,8 @@ private fun ServerLinkPanel(
     Box(
         modifier =
             modifier
-                .fillMaxWidth()
-                .height(236.dp),
+                .height(230.dp)
+                .wrapContentHeight(),
     ) {
         Box(
             modifier =
@@ -326,19 +280,6 @@ private fun ServerLinkPanel(
                             letterSpacing = 4.sp,
                         )
                     }
-
-                    Text(
-                        text = stringResource(R.string.home_client_count, clientCount.twoDigits()),
-                        modifier =
-                            Modifier
-                                .background(HazardYellow)
-                                .border(2.dp, IndustrialInk)
-                                .padding(horizontal = 9.dp, vertical = 5.dp),
-                        color = IndustrialInk,
-                        fontFamily = FontFamily.Monospace,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Black,
-                    )
                 }
 
                 if (detail != null) {
@@ -359,7 +300,8 @@ private fun ServerLinkPanel(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .height(20.dp),
+                        .height(20.dp)
+                        .padding(start = 50.dp, top = 0.dp, end = 20.dp, bottom = 0.dp),
             )
         }
     }
@@ -369,11 +311,11 @@ private fun ServerLinkPanel(
 private fun HomeActions(
     onShareClipboardClick: () -> Unit,
     onShareFileClick: () -> Unit,
+    onScanQrClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         BrutalistActionButton(
             icon = Icons.Rounded.Share,
@@ -387,6 +329,17 @@ private fun HomeActions(
             label = stringResource(R.string.share_files_title),
             containerColor = IndustrialPaper,
             onClick = onShareFileClick,
+            modifier = Modifier.weight(1f),
+        )
+    }
+    Row(
+        modifier = modifier.fillMaxWidth(),
+    ) {
+        BrutalistActionButton(
+            icon = Icons.Rounded.QrCode,
+            label = stringResource(R.string.scan_qr_code),
+            containerColor = HazardYellow,
+            onClick = onScanQrClick,
             modifier = Modifier.weight(1f),
         )
     }
@@ -411,20 +364,15 @@ private fun BrutalistActionButton(
     Box(
         modifier =
             modifier
-                .height(104.dp),
+                .fillMaxWidth()
+                .height(100.dp)
+                .padding(5.dp, 10.dp, 0.dp, 10.dp),
     ) {
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .offset(x = 6.dp, y = 6.dp)
-                    .background(IndustrialInk),
-        )
         Row(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .padding(end = 6.dp, bottom = 6.dp)
+                    .padding(end = 0.dp, bottom = 5.dp)
                     .offset { IntOffset(x = pressOffset.toPx().toInt(), y = pressOffset.toPx().toInt()) }
                     .background(containerColor)
                     .border(3.dp, IndustrialInk)
@@ -434,7 +382,7 @@ private fun BrutalistActionButton(
                         role = Role.Button,
                         onClick = onClick,
                     ).padding(horizontal = 12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(
@@ -669,7 +617,7 @@ private fun HomeBottomNavigation(modifier: Modifier = Modifier) {
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .height(12.dp),
+                    .height(20.dp),
         )
         Row(
             modifier =
