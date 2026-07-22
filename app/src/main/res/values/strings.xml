@@ -34,7 +34,7 @@
     <string name="share_clipboard_title">Share Clipboard</string>
     <string name="share_files_title">Share File</string>
     <string name="what">what?</string>
-    <string name="how">"How? "</string>
+    <string name="how">How?</string>
 
     <!-- Home -->
     <string name="home_server_link">SERVER LINK</string>
