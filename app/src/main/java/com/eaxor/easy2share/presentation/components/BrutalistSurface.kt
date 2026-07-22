@@ -69,23 +69,28 @@ fun HazardStripe(
     shouldBeAnimated: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val transition = rememberInfiniteTransition(label = "hazardConveyor")
-    val conveyorProgress by transition.animateFloat(
-        initialValue = 1f,
-        targetValue = 0f,
-        animationSpec =
-            infiniteRepeatable(
-                animation = tween(durationMillis = 520, easing = LinearEasing),
-                repeatMode = RepeatMode.Restart,
-            ),
-        label = "hazardConveyorProgress",
-    )
+    val conveyorProgress =
+        if (shouldBeAnimated) {
+            val transition = rememberInfiniteTransition(label = "hazardConveyor")
+            val progress by transition.animateFloat(
+                initialValue = 1f,
+                targetValue = 0f,
+                animationSpec =
+                    infiniteRepeatable(
+                        animation = tween(durationMillis = 520, easing = LinearEasing),
+                        repeatMode = RepeatMode.Restart,
+                    ),
+                label = "hazardConveyorProgress",
+            )
+            progress
+        } else {
+            0f
+        }
 
     Canvas(modifier = modifier.background(HazardYellow)) {
         val stripeWidth = 10.dp.toPx()
         val stripeStep = 24.dp.toPx()
-        val progress = if (shouldBeAnimated) conveyorProgress else 0f
-        var x = -size.height - stripeStep + (stripeStep * progress)
+        var x = -size.height - stripeStep + (stripeStep * conveyorProgress)
         while (x < size.width + size.height) {
             drawLine(
                 color = IndustrialInk,
