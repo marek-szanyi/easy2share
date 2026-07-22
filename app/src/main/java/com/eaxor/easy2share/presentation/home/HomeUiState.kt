@@ -1,13 +1,40 @@
+/*
+ * Copyright (c) 2026 Eaxor llc.
+ * SPDX-License-Identifier: MIT
+ * Licensed under the MIT License. See LICENSE file in the project root for full license information.
+ */
 package com.eaxor.easy2share.presentation.home
 
-public sealed class HomeUiState {
-    object Stopped : HomeUiState()
-    object PermissionsNeeded : HomeUiState()
-    object WifiNotEnabled : HomeUiState()
+data class ConnectedClient(
+    val id: String,
+    val displayName: String,
+    val address: String,
+    val fingerprint: String,
+)
 
-    data class Error(val message: String) : HomeUiState()
-    data class ServerRunning(val serverAddress: String, val serverPort: Int) : HomeUiState()
-    data class ClientConnected(val clientFingerprint: String) : HomeUiState()
-    data class AwaitingAuthentications(val pin: String) : HomeUiState()
-    data class ClipboardSharing(val clipboardContent: String) : HomeUiState()
+sealed class HomeUiState {
+    data object Stopped : HomeUiState()
+
+    data object PermissionsNeeded : HomeUiState()
+
+    data object WifiNotEnabled : HomeUiState()
+
+    data class Error(
+        val message: String,
+    ) : HomeUiState()
+
+    data class ServerRunning(
+        val serverAddress: String,
+        val serverPort: Int,
+        val authPin: String? = null,
+        val connectedClients: List<ConnectedClient> = emptyList(),
+    ) : HomeUiState()
+
+    data class AwaitingAuthentications(
+        val pin: String,
+    ) : HomeUiState()
+
+    data class ClipboardSharing(
+        val clipboardContent: String,
+    ) : HomeUiState()
 }
