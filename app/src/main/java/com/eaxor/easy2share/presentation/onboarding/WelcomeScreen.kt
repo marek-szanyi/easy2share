@@ -7,7 +7,6 @@ package com.eaxor.easy2share.presentation.onboarding
 
 import android.util.Log
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -62,6 +61,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -99,7 +99,7 @@ fun WelcomeScreen(
  * Stateless first-run welcome experience.
  *
  * The industrial presentation deliberately uses exposed structure, hard borders,
- * high-contrast utility colours, and abrupt rectangular controls.
+ * high-contrast utility colors, and abrupt rectangular controls.
  */
 @Composable
 fun WelcomeScreen(
@@ -497,11 +497,10 @@ private fun WelcomeControls(
             )
             Button(
                 onClick = { if (isLastPage) onFinished() else onNext() },
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                        .offset(x = buttonPressOffset, y = buttonPressOffset),
+                Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .offset{ IntOffset(x = buttonPressOffset.toPx().toInt(), y = buttonPressOffset.toPx().toInt()) },
                 shape = RectangleShape,
                 border = BorderStroke(3.dp, IndustrialInk),
                 interactionSource = interactionSource,
