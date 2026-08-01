@@ -6,14 +6,19 @@
 package com.eaxor.easy2share
 
 import android.os.Bundle
+import androidx.activity.compose.BackHandler
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.eaxor.easy2share.presentation.home.HomeScreen
 import com.eaxor.easy2share.presentation.home.HomeViewModel
@@ -21,6 +26,8 @@ import com.eaxor.easy2share.presentation.main.MainViewModel
 import com.eaxor.easy2share.presentation.onboarding.WelcomeScreen
 import com.eaxor.easy2share.presentation.onboarding.WelcomeViewModel
 import com.eaxor.easy2share.presentation.permissions.PermissionDialogs
+import com.eaxor.easy2share.presentation.scanning.ScannerScreen
+import com.eaxor.easy2share.presentation.scanning.ScannerViewModel
 import com.eaxor.easy2share.ui.theme.Easy2shareTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -52,7 +59,9 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun Easy2ShareApp() {
     val mainViewModel: MainViewModel = hiltViewModel<MainViewModel>()
+    val scannerViewModel: ScannerViewModel = hiltViewModel()
     val uiState by mainViewModel.uiState.collectAsStateWithLifecycle()
+    var scannerVisible by rememberSaveable { mutableStateOf(false) }
 
     when {
         uiState.isLoading -> {
@@ -61,10 +70,20 @@ private fun Easy2ShareApp() {
 
         uiState.onboardingCompleted -> {
             PermissionDialogs()
-            val homeViewModel: HomeViewModel = hiltViewModel()
-            HomeScreen(
-                viewModel = homeViewModel,
-            )
+            if (scannerVisible) {
+                BackHandler { scannerVisible = false }
+                ScannerScreen(
+                    onScanFinished = { scannerVisible = false },
+                    viewModel = scannerViewModel,
+                )
+            } else {
+                val homeViewModel: HomeViewModel = hiltViewModel()
+                homeViewModel.setScannedKey(scannerViewModel.linkKeyRaw)
+                HomeScreen(
+                    viewModel = homeViewModel,
+                    onScanQrClick = { scannerVisible = true },
+                )
+            }
         }
 
         else -> {

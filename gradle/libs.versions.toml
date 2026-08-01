@@ -1,5 +1,5 @@
 [versions]
-agp = "9.3.0"
+agp = "9.3.1"
 coreKtx = "1.19.0"
 junit = "4.13.2"
 junitVersion = "1.3.0"
@@ -13,12 +13,18 @@ coroutines = "1.11.0"
 konsist = "0.17.3"
 hilt = "2.60.1"
 hiltNavigationCompose = "1.4.0"
-ksp = "2.2.10-2.0.2"
+ksp = "2.3.2"
 accompanist = "0.37.3"
 runtime = "1.11.4"
 material3Version = "1.4.0"
 spotless = "8.8.0"
 leakcanary = "1.0.0"
+ktor = "3.5.1"
+conscrypt = "2.5.3"
+mlKit = "17.3.0"
+cameraX = "1.6.1"
+viewfinderCompose = "1.6.1"
+
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -31,6 +37,8 @@ androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "l
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
+kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
+kotlinx-coroutines-guava = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-guava", version.ref = "coroutines" }
 konsist = { group = "com.lemonappdev", name = "konsist", version.ref = "konsist" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
@@ -49,6 +57,21 @@ androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime
 androidx-material-icons-extended = { group = 'androidx.compose.material', name = 'material-icons-extended' }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3Version" }
 leakcanary = { group = "com.android.tools.studio.leakcanary", name = "leakcanary", version.ref = "leakcanary" }
+ktor-server-netty = { group = "io.ktor", name = "ktor-server-netty", version.ref = "ktor" }
+conscrypt-android = { group = "org.conscrypt", name = "conscrypt-android", version.ref = "conscrypt" }
+ktor-server = { group = "io.ktor", name = "ktor-server-core", version.ref = "ktor"}
+ktor-websockets = { group = "io.ktor", name = "ktor-server-websockets", version.ref = "ktor" }
+ktor-server-call-logging = { group = "io.ktor", name = "ktor-server-call-logging", version.ref = "ktor" }
+ktor-serialization = { group = "io.ktor", name = "ktor-serialization-kotlinx-cbor", version.ref = "ktor" }
+ktor-contentnegotiation = { group = "io.ktor", name = "ktor-server-content-negotiation", version.ref = "ktor" }
+mlKit = { group = "com.google.mlkit", name = "barcode-scanning", version.ref = "mlKit" }
+camera2= { group = "androidx.camera", name = "camera-camera2", version.ref = "cameraX" }
+cameraLifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "cameraX" }
+cameraView = { group = "androidx.camera", name = "camera-view", version.ref = "cameraX" }
+cameraCore = { group = "androidx.camera", name = "camera-core", version.ref = "cameraX" }
+androidx-viewfinder-compose = { group = "androidx.camera.viewfinder", name = "viewfinder-compose", version.ref = "viewfinderCompose" }
+camera-compose = { group = "androidx.camera", name = "camera-compose", version.ref = "cameraX" }
+switchy = { group = "dev.muazkadan", name = "switchy-compose", version = "0.7.2" }
 
 
 [plugins]
@@ -57,4 +80,5 @@ kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "ko
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
+
 

@@ -5,15 +5,10 @@
  */
 package com.eaxor.easy2share.presentation.home
 
+import android.widget.Toast
 import androidx.annotation.StringRes
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,47 +34,79 @@ import androidx.compose.material.icons.rounded.FileOpen
 import androidx.compose.material.icons.rounded.QrCode
 import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material.icons.sharp.Devices
-import androidx.compose.material.icons.sharp.Home
 import androidx.compose.material.icons.sharp.Settings
+import androidx.compose.material.icons.sharp.SettingsRemote
+import androidx.compose.material.icons.sharp.Stop
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.eaxor.easy2share.R
+import com.eaxor.easy2share.presentation.components.BrutalistActionButton
 import com.eaxor.easy2share.presentation.components.BrutalistBackdrop
 import com.eaxor.easy2share.presentation.components.HazardStripe
+import com.eaxor.easy2share.service.WebEngineService
 import com.eaxor.easy2share.ui.theme.Easy2shareTheme
 import com.eaxor.easy2share.ui.theme.HazardYellow
 import com.eaxor.easy2share.ui.theme.IndustrialInk
 import com.eaxor.easy2share.ui.theme.IndustrialPaper
+import dev.muazkadan.switchycompose.TextSwitch
 
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
     modifier: Modifier = Modifier,
+    onScanQrClick: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+
+    LaunchedEffect(viewModel) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is HomeEvents.StartServer ->
+                    WebEngineService.start(context, event.linkKey, event.serverPort)
+
+                HomeEvents.StopServer ->
+                    WebEngineService.stop(context)
+
+                HomeEvents.EncryptionKeyMissing ->
+                    Toast
+                        .makeText(
+                            context,
+                            R.string.home_key_missing_toast,
+                            Toast.LENGTH_LONG,
+                        ).show()
+
+                else -> Unit
+            }
+        }
+    }
 
     HomeScreen(
         uiState = uiState,
         modifier = modifier,
+        onScanQrClick = onScanQrClick,
+        onSharingToggle = viewModel::onSharingToggled,
     )
 }
 
@@ -90,6 +117,7 @@ fun HomeScreen(
     onShareClipboardClick: () -> Unit = {},
     onShareFileClick: () -> Unit = {},
     onScanQrClick: () -> Unit = {},
+    onSharingToggle: (Boolean) -> Unit = {},
 ) {
     val connectedClients = uiState.connectedClients()
 
@@ -149,7 +177,10 @@ fun HomeScreen(
                 }
             }
 
-            HomeBottomNavigation()
+            HomeBottomNavigation(
+                uiState = uiState,
+                onSharingToggle = onSharingToggle,
+            )
         }
     }
 }
@@ -345,75 +376,6 @@ private fun HomeActions(
     }
 }
 
-@Composable
-private fun BrutalistActionButton(
-    icon: ImageVector,
-    label: String,
-    containerColor: androidx.compose.ui.graphics.Color,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-    val pressOffset by animateDpAsState(
-        targetValue = if (isPressed) 6.dp else 0.dp,
-        animationSpec = tween(durationMillis = 55, easing = LinearEasing),
-        label = "homeActionPressOffset",
-    )
-
-    Box(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .height(100.dp)
-                .padding(5.dp, 10.dp, 0.dp, 10.dp),
-    ) {
-        Row(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(end = 0.dp, bottom = 5.dp)
-                    .offset { IntOffset(x = pressOffset.toPx().toInt(), y = pressOffset.toPx().toInt()) }
-                    .background(containerColor)
-                    .border(3.dp, IndustrialInk)
-                    .clickable(
-                        interactionSource = interactionSource,
-                        indication = null,
-                        role = Role.Button,
-                        onClick = onClick,
-                    ).padding(horizontal = 12.dp),
-            horizontalArrangement = Arrangement.SpaceAround,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(5.dp),
-            ) {
-                Text(
-                    text = label.uppercase(),
-                    color = IndustrialInk,
-                    fontFamily = FontFamily.Monospace,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Black,
-                    lineHeight = 16.sp,
-                )
-                Box(
-                    modifier =
-                        Modifier
-                            .width(38.dp)
-                            .height(3.dp)
-                            .background(IndustrialInk),
-                )
-            }
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = IndustrialInk,
-                modifier = Modifier.size(30.dp),
-            )
-        }
-    }
-}
 
 @Composable
 private fun ClientListHeader(
@@ -597,13 +559,19 @@ private fun ConnectedClientItem(
 }
 
 @Composable
-private fun HomeBottomNavigation(modifier: Modifier = Modifier) {
-    var selectedIndex by rememberSaveable { mutableIntStateOf(0) }
+private fun HomeBottomNavigation(
+    uiState: HomeUiState,
+    onSharingToggle: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val isSharing = uiState is HomeUiState.ServerRunning
     val items =
         listOf(
-            HomeNavigationItem(Icons.Sharp.Home, R.string.home_nav_home),
-            HomeNavigationItem(Icons.Sharp.Devices, R.string.home_nav_clients),
-            HomeNavigationItem(Icons.Sharp.Settings, R.string.home_nav_settings),
+            HomeNavigationItem(
+                Icons.Sharp.SettingsRemote,
+                R.string.home_start_server,
+                R.string.home_server_stopped
+            )
         )
 
     Column(
@@ -617,21 +585,22 @@ private fun HomeBottomNavigation(modifier: Modifier = Modifier) {
             modifier =
                 Modifier
                     .fillMaxWidth()
+                    .border(4.dp, IndustrialInk)
                     .height(20.dp),
         )
         Row(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .border(3.dp, IndustrialInk)
-                    .padding(7.dp),
-            horizontalArrangement = Arrangement.spacedBy(7.dp),
+                    .border(2.dp, IndustrialInk)
+                    .padding(1.dp),
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            items.forEachIndexed { index, item ->
+            items.forEach { item ->
                 HomeBottomNavigationItem(
                     item = item,
-                    selected = selectedIndex == index,
-                    onClick = { selectedIndex = index },
+                    checked = isSharing,
+                    onCheckedChange = onSharingToggle,
                     modifier = Modifier.weight(1f),
                 )
             }
@@ -642,65 +611,53 @@ private fun HomeBottomNavigation(modifier: Modifier = Modifier) {
 @Composable
 private fun HomeBottomNavigationItem(
     item: HomeNavigationItem,
-    selected: Boolean,
-    onClick: () -> Unit,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val label = stringResource(item.label)
+    val sharingOnLabel = stringResource(item.label)
+    val notSharingLabel = stringResource(item.secondLabel)
 
     Row(
         modifier =
             modifier
-                .height(48.dp)
-                .background(if (selected) HazardYellow else IndustrialPaper)
-                .border(2.dp, IndustrialInk)
-                .selectable(
-                    selected = selected,
-                    role = Role.Tab,
-                    onClick = onClick,
-                ).padding(horizontal = 8.dp),
+                .wrapContentHeight()
+                .background(if (checked) HazardYellow else IndustrialPaper)
+                .padding(10.dp)
+                .border(2.dp, IndustrialInk),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
+
     ) {
-        Icon(
-            imageVector = item.icon,
-            contentDescription = label,
-            tint = IndustrialInk,
-            modifier = Modifier.size(20.dp),
+        // Unchecked (default) shows "NOT SHARING"; checked shows "SHARING ON".
+        TextSwitch(
+            modifier = Modifier.padding(vertical = 2.dp),
+            checked = checked,
+            positiveText = sharingOnLabel,
+            negativeText = notSharingLabel,
+            color = HazardYellow,
+            onCheckedChange = onCheckedChange
         )
-        if (selected) {
-            Spacer(Modifier.width(6.dp))
-            Text(
-                text = label,
-                color = IndustrialInk,
-                fontFamily = FontFamily.Monospace,
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Black,
-                maxLines = 1,
-            )
-        }
     }
 }
 
 private data class HomeNavigationItem(
     val icon: ImageVector,
     @StringRes val label: Int,
-)
+    @StringRes val secondLabel: Int,
+) {
+}
 
 private fun HomeUiState.connectedClients(): List<ConnectedClient> = (this as? HomeUiState.ServerRunning)?.connectedClients.orEmpty()
 
 private fun HomeUiState.serverAddress(): String =
     when (this) {
-        is HomeUiState.ServerRunning -> {
-            val address =
-                if (serverAddress.startsWith("http://") || serverAddress.startsWith("https://")) {
-                    serverAddress
-                } else {
-                    "http://$serverAddress"
-                }
-            "$address:$serverPort/"
+        is HomeUiState.CanStartServer -> {
+            "$ipAddress:$serverPort"
         }
-
+        is HomeUiState.ServerRunning -> {
+            "$serverAddress:$serverPort"
+        }
         else -> {
             "--"
         }
@@ -719,6 +676,8 @@ private fun HomeUiState.statusLabel(): Int =
         HomeUiState.Stopped -> R.string.home_status_stopped
         HomeUiState.PermissionsNeeded -> R.string.home_status_permissions
         HomeUiState.WifiNotEnabled -> R.string.home_status_wifi
+        HomeUiState.Scanning -> R.string.home_status_key_required
+        is HomeUiState.CanStartServer -> R.string.home_status_ready_to_share
         is HomeUiState.Error -> R.string.home_status_error
         is HomeUiState.ServerRunning -> R.string.home_status_running
         is HomeUiState.AwaitingAuthentications -> R.string.home_status_waiting
@@ -748,13 +707,13 @@ private val sampleConnectedClients =
 private fun HomeScreenPreview() {
     Easy2shareTheme(darkTheme = false) {
         HomeScreen(
-            uiState =
-                HomeUiState.ServerRunning(
-                    serverAddress = "192.168.0.25",
-                    serverPort = 8080,
-                    authPin = "854652",
-                    connectedClients = sampleConnectedClients,
-                ),
+            uiState = HomeUiState.Scanning
+//                HomeUiState.ServerRunning(
+//                    serverAddress = "192.168.0.25",
+//                    serverPort = 8080,
+//                    authPin = "854652",
+//                    connectedClients = sampleConnectedClients,
+//                ),
         )
     }
 }

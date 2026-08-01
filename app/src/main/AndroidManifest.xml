@@ -13,6 +13,9 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-feature android:name="android.hardware.camera"/>
+
     <!-- Runtime permission (API 33+): required to post the persistent foreground notification -->
     <uses-permission
         android:name="android.permission.POST_NOTIFICATIONS"
@@ -40,6 +43,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Foreground service hosting the embedded web server while sharing is active -->
+        <service
+            android:name=".service.WebEngineService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Local network clipboard and file sharing via an embedded web server" />
+        </service>
     </application>
 
 </manifest>

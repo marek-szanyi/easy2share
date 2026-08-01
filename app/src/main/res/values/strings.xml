@@ -53,8 +53,19 @@
     <string name="home_no_clients_body">Open the server address on another device to establish a secure link.</string>
     <string name="home_client_secure">SECURE</string>
     <string name="home_client_fingerprint">FP %1$s</string>
-    <string name="home_nav_home">HOME</string>
-    <string name="home_nav_clients">CLIENTS</string>
+    <string name="home_start_server">SHARING ON</string>
     <string name="home_nav_settings">SETTINGS</string>
     <string name="scan_qr_code">Scan QR code</string>
+    <string name="welcome_message">Easily share clipboard &amp; files</string>
+    <string name="home_status_key_required">Need Encryption Key</string>
+    <string name="try_again">TRY AGAIN</string>
+    <string name="home_status_ready_to_share">READY 2 SHARE</string>
+    <string name="home_server_running">SHARING</string>
+    <string name="home_server_stopped">NOT SHARING</string>
+
+    <!-- Sharing foreground service notification -->
+    <string name="sharing_notification_channel_name">Sharing service</string>
+    <string name="sharing_notification_title">Sharing is ON</string>
+    <string name="sharing_notification_text">The easy2share server is running and reachable on your local network.</string>
+    <string name="home_key_missing_toast">Scan the QR code first to obtain an encryption key before sharing.</string>
 </resources>
