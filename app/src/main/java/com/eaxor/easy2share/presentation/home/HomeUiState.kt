@@ -19,6 +19,8 @@ sealed class HomeUiState {
 
     data object WifiNotEnabled : HomeUiState()
 
+    data object Scanning : HomeUiState()
+
     data class Error(
         val message: String,
     ) : HomeUiState()
@@ -36,5 +38,11 @@ sealed class HomeUiState {
 
     data class ClipboardSharing(
         val clipboardContent: String,
+    ) : HomeUiState()
+
+    data class CanStartServer(
+        val linkKey: ByteArray?,
+        val ipAddress : String,
+        val serverPort: Int = 8080,
     ) : HomeUiState()
 }
