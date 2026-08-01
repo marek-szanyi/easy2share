@@ -29,6 +29,8 @@ import com.eaxor.easy2share.presentation.permissions.PermissionDialogs
 import com.eaxor.easy2share.presentation.scanning.ScannerScreen
 import com.eaxor.easy2share.presentation.scanning.ScannerViewModel
 import com.eaxor.easy2share.ui.theme.Easy2shareTheme
+import com.eaxor.easy2share.service.WebEngineService
+import android.content.pm.ApplicationInfo
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
@@ -43,6 +45,15 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        // TEMP-DEBUG: allow starting the sharing server from adb in debuggable builds only:
+        // adb shell am start -n com.eaxor.easy2share/.MainActivity --es debug_key_b64 <base64-key>
+        if (applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0) {
+            intent?.getStringExtra("debug_key_b64")?.let { b64 ->
+                val key = android.util.Base64.decode(b64, android.util.Base64.DEFAULT)
+                WebEngineService.start(this, key)
+            }
+        }
 
         setContent {
             Easy2shareTheme {
