@@ -72,8 +72,10 @@ fun buildWebsocketEngine(dispatcher: CoroutineDispatcher, port: Int, key: ByteAr
         connector { this.port = port }
         enableHttp2 = false
     }) {
+        Log.i("WebEngine", "application module: configuring server")
         configureServer()
         configureRouting(dispatcher, key)
+        Log.i("WebEngine", "application module: routing configured")
     }
 }
 
@@ -85,7 +87,8 @@ private fun Application.configureServer() {
         pingPeriod = 15.seconds
         timeout = 15.seconds
         maxFrameSize = Long.MAX_VALUE
-        masking = true
+        // Servers must not mask frames (RFC 6455); browsers reject masked server frames.
+        masking = false
         contentConverter = KotlinxWebsocketSerializationConverter(Cbor)
     }
     install(CallLogging) {
@@ -130,13 +133,15 @@ private suspend fun Application.configureRouting(dispatcher: CoroutineDispatcher
                             val decrypted = envelope.data.decryptChaCha20(key)
                             val registerMessage = Cbor.decodeFromByteArray<RegisterMessage>(decrypted)
                             Log.i("WebEngine", "Client registered: ${registerMessage.clientName}")
-                            notifySessions.send(this)
                             val responseBytes = Cbor.encodeToByteArray(
                                 ResponseMessage(isOk = true, message = "Welcome", code = 201)
                             )
                             val responseEnvelope = EncryptedMessage(responseBytes.encryptChaCha20(key))
                             send(Frame.Binary(true, Cbor.encodeToByteArray(responseEnvelope)))
                             Log.i("WebEngine", "Welcome response sent to ${registerMessage.clientName}")
+                            // trySend: the channel has no consumer yet; a suspending send
+                            // would block this receive loop forever.
+                            notifySessions.trySend(this)
                         } catch (e: Exception) {
                             Log.e("WebEngine", "Error decoding or decrypting message", e)
                             e.printStackTrace()

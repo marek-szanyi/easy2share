@@ -6,6 +6,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
 }
@@ -78,6 +79,7 @@ dependencies {
     implementation(libs.ktor.serialization)
     implementation(libs.ktor.server.call.logging)
     implementation(libs.ktor.contentnegotiation)
+    implementation("org.slf4j:slf4j-simple:2.0.16")
     implementation(libs.mlKit)
     implementation(libs.camera2)
     implementation(libs.cameraLifecycle)
