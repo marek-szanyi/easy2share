@@ -5,6 +5,7 @@
  */
 package com.eaxor.easy2share.presentation.home
 
+import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
@@ -28,31 +29,18 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.FileOpen
 import androidx.compose.material.icons.rounded.QrCode
 import androidx.compose.material.icons.rounded.Share
-import androidx.compose.material.icons.sharp.Devices
-import androidx.compose.material.icons.sharp.Settings
-import androidx.compose.material.icons.sharp.SettingsRemote
-import androidx.compose.material.icons.sharp.Stop
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -61,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.eaxor.easy2share.R
+import com.eaxor.easy2share.domain.usecase.GetClipboardContentUseCase
 import com.eaxor.easy2share.presentation.components.BrutalistActionButton
 import com.eaxor.easy2share.presentation.components.BrutalistBackdrop
 import com.eaxor.easy2share.presentation.components.HazardStripe
@@ -97,6 +86,30 @@ fun HomeScreen(
                             Toast.LENGTH_LONG,
                         ).show()
 
+                HomeEvents.ClipboardShared ->
+                    Toast
+                        .makeText(
+                            context,
+                            R.string.home_clipboard_shared_toast,
+                            Toast.LENGTH_SHORT,
+                        ).show()
+
+                HomeEvents.ClipboardEmpty ->
+                    Toast
+                        .makeText(
+                            context,
+                            R.string.home_clipboard_empty_toast,
+                            Toast.LENGTH_SHORT,
+                        ).show()
+
+                HomeEvents.SharingNotActive ->
+                    Toast
+                        .makeText(
+                            context,
+                            R.string.home_sharing_not_active_toast,
+                            Toast.LENGTH_LONG,
+                        ).show()
+
                 else -> Unit
             }
         }
@@ -104,7 +117,9 @@ fun HomeScreen(
 
     HomeScreen(
         uiState = uiState,
+        viewModel = viewModel,
         modifier = modifier,
+        onShareClipboardClick = viewModel::onShareClipboardClicked,
         onScanQrClick = onScanQrClick,
         onSharingToggle = viewModel::onSharingToggled,
     )
@@ -113,9 +128,10 @@ fun HomeScreen(
 @Composable
 fun HomeScreen(
     uiState: HomeUiState,
+    viewModel: HomeViewModel,
     modifier: Modifier = Modifier,
     onShareClipboardClick: () -> Unit = {},
-    onShareFileClick: () -> Unit = {},
+//    onShareFileClick: () -> Unit = {},
     onScanQrClick: () -> Unit = {},
     onSharingToggle: (Boolean) -> Unit = {},
 ) {
@@ -140,18 +156,16 @@ fun HomeScreen(
             ) {
                 item {
                     ServerLinkPanel(
-                        address = uiState.serverAddress(),
-                        authPin = uiState.authPin(),
+                        address = viewModel.serverAddress,
                         status = uiState.statusLabel(),
                         shouldAnimate = uiState is HomeUiState.ServerRunning,
-                        detail = (uiState as? HomeUiState.Error)?.message,
                     )
                 }
 
                 item {
                     HomeActions(
                         onShareClipboardClick = onShareClipboardClick,
-                        onShareFileClick = onShareFileClick,
+//                        onShareFileClick = onShareFileClick,
                         onScanQrClick = onScanQrClick,
                     )
                 }
@@ -188,10 +202,8 @@ fun HomeScreen(
 @Composable
 private fun ServerLinkPanel(
     address: String,
-    authPin: String,
     @StringRes status: Int,
     shouldAnimate: Boolean,
-    detail: String?,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -262,6 +274,42 @@ private fun ServerLinkPanel(
                         .border(3.dp, IndustrialInk)
                         .padding(horizontal = 14.dp, vertical = 12.dp),
             ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Bottom,
+                ) {
+                    Column {
+                        Text(
+                            text = stringResource(R.string.home_start_by_visiting_on_your_pc),
+                            color = IndustrialInk,
+                            fontFamily = FontFamily.Monospace,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 1.5.sp,
+                        )
+                        Text(
+                            text = stringResource(R.string.home_official_getlink),
+                            color = IndustrialInk,
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 1.sp,
+                            autoSize = TextAutoSize.StepBased(minFontSize = 1.sp, maxFontSize = 22.sp),
+                            maxLines = 1
+                        )
+                    }
+                }
+
+                Spacer(Modifier.height(9.dp))
+                Box(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(3.dp)
+                            .background(IndustrialInk),
+                )
+                Spacer(Modifier.height(9.dp))
+
                 Text(
                     text = stringResource(R.string.home_server_address),
                     color = IndustrialInk,
@@ -279,51 +327,7 @@ private fun ServerLinkPanel(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                Spacer(Modifier.height(9.dp))
-                Box(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .height(3.dp)
-                            .background(IndustrialInk),
-                )
-                Spacer(Modifier.height(9.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Bottom,
-                ) {
-                    Column {
-                        Text(
-                            text = stringResource(R.string.home_auth_pin),
-                            color = IndustrialInk,
-                            fontFamily = FontFamily.Monospace,
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Black,
-                            letterSpacing = 1.5.sp,
-                        )
-                        Text(
-                            text = authPin,
-                            color = IndustrialInk,
-                            fontFamily = FontFamily.Monospace,
-                            fontSize = 19.sp,
-                            fontWeight = FontWeight.Black,
-                            letterSpacing = 4.sp,
-                        )
-                    }
-                }
 
-                if (detail != null) {
-                    Spacer(Modifier.height(5.dp))
-                    Text(
-                        text = detail,
-                        color = IndustrialInk,
-                        fontFamily = FontFamily.Monospace,
-                        fontSize = 10.sp,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
             }
 
             HazardStripe(
@@ -341,7 +345,7 @@ private fun ServerLinkPanel(
 @Composable
 private fun HomeActions(
     onShareClipboardClick: () -> Unit,
-    onShareFileClick: () -> Unit,
+//    onShareFileClick: () -> Unit,
     onScanQrClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -355,13 +359,14 @@ private fun HomeActions(
             onClick = onShareClipboardClick,
             modifier = Modifier.weight(1f),
         )
-        BrutalistActionButton(
-            icon = Icons.Rounded.FileOpen,
-            label = stringResource(R.string.share_files_title),
-            containerColor = IndustrialPaper,
-            onClick = onShareFileClick,
-            modifier = Modifier.weight(1f),
-        )
+        //TODO! Add functionality to share files
+//        BrutalistActionButton(
+//            icon = Icons.Rounded.FileOpen,
+//            label = stringResource(R.string.share_files_title),
+//            containerColor = IndustrialPaper,
+//            onClick = onShareFileClick,
+//            modifier = Modifier.weight(1f),
+//        )
     }
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -565,14 +570,6 @@ private fun HomeBottomNavigation(
     modifier: Modifier = Modifier,
 ) {
     val isSharing = uiState is HomeUiState.ServerRunning
-    val items =
-        listOf(
-            HomeNavigationItem(
-                Icons.Sharp.SettingsRemote,
-                R.string.home_start_server,
-                R.string.home_server_stopped
-            )
-        )
 
     Column(
         modifier =
@@ -596,33 +593,26 @@ private fun HomeBottomNavigation(
                     .padding(1.dp),
             horizontalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            items.forEach { item ->
-                HomeBottomNavigationItem(
-                    item = item,
+            HomeBottomNavigationItem(
                     checked = isSharing,
                     onCheckedChange = onSharingToggle,
                     modifier = Modifier.weight(1f),
                 )
-            }
         }
     }
 }
 
 @Composable
 private fun HomeBottomNavigationItem(
-    item: HomeNavigationItem,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val sharingOnLabel = stringResource(item.label)
-    val notSharingLabel = stringResource(item.secondLabel)
-
     Row(
         modifier =
             modifier
                 .wrapContentHeight()
-                .background(if (checked) HazardYellow else IndustrialPaper)
+                .background( IndustrialPaper)
                 .padding(10.dp)
                 .border(2.dp, IndustrialInk),
         horizontalArrangement = Arrangement.Center,
@@ -633,42 +623,15 @@ private fun HomeBottomNavigationItem(
         TextSwitch(
             modifier = Modifier.padding(vertical = 2.dp),
             checked = checked,
-            positiveText = sharingOnLabel,
-            negativeText = notSharingLabel,
+            positiveText = stringResource(R.string.home_start_server),
+            negativeText = stringResource(R.string.home_server_stopped),
             color = HazardYellow,
             onCheckedChange = onCheckedChange
         )
     }
 }
 
-private data class HomeNavigationItem(
-    val icon: ImageVector,
-    @StringRes val label: Int,
-    @StringRes val secondLabel: Int,
-) {
-}
-
 private fun HomeUiState.connectedClients(): List<ConnectedClient> = (this as? HomeUiState.ServerRunning)?.connectedClients.orEmpty()
-
-private fun HomeUiState.serverAddress(): String =
-    when (this) {
-        is HomeUiState.CanStartServer -> {
-            "$ipAddress:$serverPort"
-        }
-        is HomeUiState.ServerRunning -> {
-            "$serverAddress:$serverPort"
-        }
-        else -> {
-            "--"
-        }
-    }
-
-private fun HomeUiState.authPin(): String =
-    when (this) {
-        is HomeUiState.ServerRunning -> authPin ?: "------"
-        is HomeUiState.AwaitingAuthentications -> pin
-        else -> "------"
-    }
 
 @StringRes
 private fun HomeUiState.statusLabel(): Int =
@@ -680,34 +643,21 @@ private fun HomeUiState.statusLabel(): Int =
         is HomeUiState.CanStartServer -> R.string.home_status_ready_to_share
         is HomeUiState.Error -> R.string.home_status_error
         is HomeUiState.ServerRunning -> R.string.home_status_running
-        is HomeUiState.AwaitingAuthentications -> R.string.home_status_waiting
+        is HomeUiState.AwaitingSessionKey -> R.string.home_status_key_required
         is HomeUiState.ClipboardSharing -> R.string.home_status_clipboard
     }
 
 private fun Int.twoDigits(): String = toString().padStart(2, '0')
 
-private val sampleConnectedClients =
-    listOf(
-        ConnectedClient(
-            id = "studio-pc",
-            displayName = "STUDIO-PC",
-            address = "192.168.0.14",
-            fingerprint = "A9F2-7C31-18D4",
-        ),
-        ConnectedClient(
-            id = "workstation",
-            displayName = "WORKSTATION-02",
-            address = "192.168.0.23",
-            fingerprint = "74B1-0E6A-993C",
-        ),
-    )
 
+@SuppressLint("ViewModelConstructorInComposable")
 @Preview(showBackground = true, widthDp = 411, heightDp = 891)
 @Composable
 private fun HomeScreenPreview() {
     Easy2shareTheme(darkTheme = false) {
         HomeScreen(
-            uiState = HomeUiState.Scanning
+            uiState = HomeUiState.Scanning,
+            viewModel = HomeViewModel(GetClipboardContentUseCase(LocalContext.current)),
 //                HomeUiState.ServerRunning(
 //                    serverAddress = "192.168.0.25",
 //                    serverPort = 8080,
@@ -718,6 +668,7 @@ private fun HomeScreenPreview() {
     }
 }
 
+@SuppressLint("ViewModelConstructorInComposable")
 @Preview(showBackground = true, widthDp = 411, heightDp = 891, name = "Empty clients")
 @Composable
 private fun EmptyHomeScreenPreview() {
@@ -727,8 +678,8 @@ private fun EmptyHomeScreenPreview() {
                 HomeUiState.ServerRunning(
                     serverAddress = "192.168.0.25",
                     serverPort = 8080,
-                    authPin = "854652",
                 ),
+            viewModel = HomeViewModel(GetClipboardContentUseCase(LocalContext.current)),
         )
     }
 }
