@@ -55,7 +55,7 @@ fun rememberScannerController(
 
 @Stable
 class ScannerController(
-    private val context: Context,
+    context: Context,
     private val lifecycleOwner: LifecycleOwner,
     private val onQrCodes: (
         qrCodes: List<DetectedQr>,
