@@ -5,20 +5,23 @@
  */
 package com.eaxor.easy2share
 
+import android.content.pm.ApplicationInfo
 import android.os.Bundle
-import androidx.activity.compose.BackHandler
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.eaxor.easy2share.presentation.home.HomeScreen
 import com.eaxor.easy2share.presentation.home.HomeViewModel
@@ -28,9 +31,10 @@ import com.eaxor.easy2share.presentation.onboarding.WelcomeViewModel
 import com.eaxor.easy2share.presentation.permissions.PermissionDialogs
 import com.eaxor.easy2share.presentation.scanning.ScannerScreen
 import com.eaxor.easy2share.presentation.scanning.ScannerViewModel
-import com.eaxor.easy2share.ui.theme.Easy2shareTheme
 import com.eaxor.easy2share.service.WebEngineService
-import android.content.pm.ApplicationInfo
+import com.eaxor.easy2share.ui.theme.Easy2shareTheme
+import com.eaxor.easy2share.ui.theme.HazardYellow
+import com.eaxor.easy2share.ui.theme.IndustrialInk
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
@@ -43,17 +47,8 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge(statusBarStyle = SystemBarStyle.dark(IndustrialInk.toArgb()))
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-
-        // TEMP-DEBUG: allow starting the sharing server from adb in debuggable builds only:
-        // adb shell am start -n com.eaxor.easy2share/.MainActivity --es debug_key_b64 <base64-key>
-        if (applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0) {
-            intent?.getStringExtra("debug_key_b64")?.let { b64 ->
-                val key = android.util.Base64.decode(b64, android.util.Base64.DEFAULT)
-                WebEngineService.start(this, key)
-            }
-        }
 
         setContent {
             Easy2shareTheme {
@@ -101,7 +96,7 @@ private fun Easy2ShareApp() {
             val welcomeViewModel: WelcomeViewModel = hiltViewModel()
             WelcomeScreen(
                 viewModel = welcomeViewModel,
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize().systemBarsPadding(),
             )
         }
     }

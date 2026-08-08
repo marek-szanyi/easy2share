@@ -48,7 +48,6 @@ android {
             excludes += "META-INF/io.netty.versions.properties"
         }
     }
-
 }
 
 dependencies {
@@ -79,7 +78,7 @@ dependencies {
     implementation(libs.ktor.serialization)
     implementation(libs.ktor.server.call.logging)
     implementation(libs.ktor.contentnegotiation)
-    implementation("org.slf4j:slf4j-simple:2.0.16")
+    implementation(libs.slf4j.simple)
     implementation(libs.mlKit)
     implementation(libs.camera2)
     implementation(libs.cameraLifecycle)

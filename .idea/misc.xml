@@ -7,4 +7,11 @@
   <component name="ProjectType">
     <option name="id" value="Android" />
   </component>
+  <component name="com.github.lipiridi.spotless.applier.ui.settings.ModuleSettingsState">
+    <option name="selectedModules">
+      <list>
+        <option value="easy2share.app" />
+      </list>
+    </option>
+  </component>
 </project>

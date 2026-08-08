@@ -1,8 +1,12 @@
+/*
+ * Copyright (c) 2026 Eaxor llc.
+ * SPDX-License-Identifier: MIT
+ * Licensed under the MIT License. See LICENSE file in the project root for full license information.
+ */
 package com.eaxor.easy2share.presentation.scanning
 
 import android.graphics.Rect
 import androidx.compose.runtime.Immutable
-
 
 /**
  * A single Qr detected by ML Kit on an analysis frame.
@@ -34,7 +38,7 @@ sealed interface ScannerUiState {
     ) : ScannerUiState
 
     data class Finished(
-        val qrCode: DetectedQr
+        val qrCode: DetectedQr,
     ) : ScannerUiState
 
     data class Error(

@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2026 Eaxor llc.
+ * SPDX-License-Identifier: MIT
+ * Licensed under the MIT License. See LICENSE file in the project root for full license information.
+ */
 package com.eaxor.easy2share.di
 
 import android.content.Context
@@ -23,11 +28,9 @@ private val Context.onboardingDataStore: DataStore<Preferences> by preferencesDa
 @Module
 @InstallIn(SingletonComponent::class)
 object DataStoreModule {
-
     @Provides
     @Singleton
     fun provideOnboardingDataStore(
         @ApplicationContext context: Context,
     ): DataStore<Preferences> = context.onboardingDataStore
 }
-

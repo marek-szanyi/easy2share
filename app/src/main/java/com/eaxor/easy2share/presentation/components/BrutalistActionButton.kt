@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2026 Eaxor llc.
+ * SPDX-License-Identifier: MIT
+ * Licensed under the MIT License. See LICENSE file in the project root for full license information.
+ */
 package com.eaxor.easy2share.presentation.components
 
 import androidx.compose.animation.core.LinearEasing
@@ -66,18 +71,16 @@ fun BrutalistActionButton(
                     .offset {
                         IntOffset(
                             x = pressOffset.toPx().toInt(),
-                            y = pressOffset.toPx().toInt()
+                            y = pressOffset.toPx().toInt(),
                         )
-                    }
-                    .background(containerColor)
+                    }.background(containerColor)
                     .border(3.dp, IndustrialInk)
                     .clickable(
                         interactionSource = interactionSource,
                         indication = null,
                         role = Role.Button,
                         onClick = onClick,
-                    )
-                    .padding(horizontal = 12.dp),
+                    ).padding(horizontal = 12.dp),
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically,
         ) {

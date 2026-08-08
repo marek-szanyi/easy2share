@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2026 Eaxor llc.
+ * SPDX-License-Identifier: MIT
+ * Licensed under the MIT License. See LICENSE file in the project root for full license information.
+ */
 package com.eaxor.easy2share.konsist
 
 import com.lemonappdev.konsist.api.Konsist
@@ -22,7 +27,6 @@ import org.junit.Test
  * accurate for constructor-injected ViewModels.
  */
 class MvvmPatternKonsistTest {
-
     @Test
     fun `classes extending ViewModel reside in the presentation layer`() {
         Konsist
@@ -67,6 +71,4 @@ class MvvmPatternKonsistTest {
 }
 
 /** True when the class declares the Android `ViewModel` as a direct super-type. */
-private fun KoClassDeclaration.extendsViewModel(): Boolean =
-    parents().any { it.name == "ViewModel" }
-
+private fun KoClassDeclaration.extendsViewModel(): Boolean = parents().any { it.name == "ViewModel" }

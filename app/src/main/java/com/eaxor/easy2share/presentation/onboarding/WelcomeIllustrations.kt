@@ -38,7 +38,9 @@ fun IndustrialFilePressIllustration(
     paper: Color,
     modifier: Modifier = Modifier,
 ) {
-    val sentLabel = androidx.compose.ui.res.stringResource(com.eaxor.easy2share.R.string.welcome_sent_stamp)
+    val sentLabel =
+        androidx.compose.ui.res
+            .stringResource(com.eaxor.easy2share.R.string.welcome_sent_stamp)
     val stampPaint =
         remember(sentLabel, accent) {
             Paint().apply {

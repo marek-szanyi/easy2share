@@ -72,45 +72,53 @@ fun HomeScreen(
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
             when (event) {
-                is HomeEvents.StartServer ->
+                is HomeEvents.StartServer -> {
                     WebEngineService.start(context, event.linkKey, event.serverPort)
+                }
 
-                HomeEvents.StopServer ->
+                HomeEvents.StopServer -> {
                     WebEngineService.stop(context)
+                }
 
-                HomeEvents.EncryptionKeyMissing ->
+                HomeEvents.EncryptionKeyMissing -> {
                     Toast
                         .makeText(
                             context,
                             R.string.home_key_missing_toast,
                             Toast.LENGTH_LONG,
                         ).show()
+                }
 
-                HomeEvents.ClipboardShared ->
+                HomeEvents.ClipboardShared -> {
                     Toast
                         .makeText(
                             context,
                             R.string.home_clipboard_shared_toast,
                             Toast.LENGTH_SHORT,
                         ).show()
+                }
 
-                HomeEvents.ClipboardEmpty ->
+                HomeEvents.ClipboardEmpty -> {
                     Toast
                         .makeText(
                             context,
                             R.string.home_clipboard_empty_toast,
                             Toast.LENGTH_SHORT,
                         ).show()
+                }
 
-                HomeEvents.SharingNotActive ->
+                HomeEvents.SharingNotActive -> {
                     Toast
                         .makeText(
                             context,
                             R.string.home_sharing_not_active_toast,
                             Toast.LENGTH_LONG,
                         ).show()
+                }
 
-                else -> Unit
+                else -> {
+                    Unit
+                }
             }
         }
     }
@@ -131,7 +139,6 @@ fun HomeScreen(
     viewModel: HomeViewModel,
     modifier: Modifier = Modifier,
     onShareClipboardClick: () -> Unit = {},
-//    onShareFileClick: () -> Unit = {},
     onScanQrClick: () -> Unit = {},
     onSharingToggle: (Boolean) -> Unit = {},
 ) {
@@ -165,7 +172,6 @@ fun HomeScreen(
                 item {
                     HomeActions(
                         onShareClipboardClick = onShareClipboardClick,
-//                        onShareFileClick = onShareFileClick,
                         onScanQrClick = onScanQrClick,
                     )
                 }
@@ -295,7 +301,7 @@ private fun ServerLinkPanel(
                             fontWeight = FontWeight.Black,
                             letterSpacing = 1.sp,
                             autoSize = TextAutoSize.StepBased(minFontSize = 1.sp, maxFontSize = 22.sp),
-                            maxLines = 1
+                            maxLines = 1,
                         )
                     }
                 }
@@ -327,7 +333,6 @@ private fun ServerLinkPanel(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-
             }
 
             HazardStripe(
@@ -345,7 +350,6 @@ private fun ServerLinkPanel(
 @Composable
 private fun HomeActions(
     onShareClipboardClick: () -> Unit,
-//    onShareFileClick: () -> Unit,
     onScanQrClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -359,14 +363,7 @@ private fun HomeActions(
             onClick = onShareClipboardClick,
             modifier = Modifier.weight(1f),
         )
-        //TODO! Add functionality to share files
-//        BrutalistActionButton(
-//            icon = Icons.Rounded.FileOpen,
-//            label = stringResource(R.string.share_files_title),
-//            containerColor = IndustrialPaper,
-//            onClick = onShareFileClick,
-//            modifier = Modifier.weight(1f),
-//        )
+        // TODO! Add functionality to share files
     }
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -380,7 +377,6 @@ private fun HomeActions(
         )
     }
 }
-
 
 @Composable
 private fun ClientListHeader(
@@ -594,10 +590,10 @@ private fun HomeBottomNavigation(
             horizontalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             HomeBottomNavigationItem(
-                    checked = isSharing,
-                    onCheckedChange = onSharingToggle,
-                    modifier = Modifier.weight(1f),
-                )
+                checked = isSharing,
+                onCheckedChange = onSharingToggle,
+                modifier = Modifier.weight(1f),
+            )
         }
     }
 }
@@ -612,12 +608,11 @@ private fun HomeBottomNavigationItem(
         modifier =
             modifier
                 .wrapContentHeight()
-                .background( IndustrialPaper)
+                .background(IndustrialPaper)
                 .padding(10.dp)
                 .border(2.dp, IndustrialInk),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
-
     ) {
         // Unchecked (default) shows "NOT SHARING"; checked shows "SHARING ON".
         TextSwitch(
@@ -626,7 +621,7 @@ private fun HomeBottomNavigationItem(
             positiveText = stringResource(R.string.home_start_server),
             negativeText = stringResource(R.string.home_server_stopped),
             color = HazardYellow,
-            onCheckedChange = onCheckedChange
+            onCheckedChange = onCheckedChange,
         )
     }
 }
@@ -648,7 +643,6 @@ private fun HomeUiState.statusLabel(): Int =
     }
 
 private fun Int.twoDigits(): String = toString().padStart(2, '0')
-
 
 @SuppressLint("ViewModelConstructorInComposable")
 @Preview(showBackground = true, widthDp = 411, heightDp = 891)

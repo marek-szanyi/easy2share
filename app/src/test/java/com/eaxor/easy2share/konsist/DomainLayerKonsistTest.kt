@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2026 Eaxor llc.
+ * SPDX-License-Identifier: MIT
+ * Licensed under the MIT License. See LICENSE file in the project root for full license information.
+ */
 package com.eaxor.easy2share.konsist
 
 import com.lemonappdev.konsist.api.Konsist
@@ -10,7 +15,6 @@ import org.junit.Test
  * Guards the purity and conventions of the innermost (domain) layer.
  */
 class DomainLayerKonsistTest {
-
     private companion object {
         const val DOMAIN_PACKAGE = "com.eaxor.easy2share.domain"
     }
@@ -20,8 +24,12 @@ class DomainLayerKonsistTest {
         Konsist
             .scopeFromProject()
             .files
-            .filter { it.packagee?.name.orEmpty().startsWith(DOMAIN_PACKAGE) }
-            .assertFalse { file ->
+            .filter {
+                it.packagee
+                    ?.name
+                    .orEmpty()
+                    .startsWith(DOMAIN_PACKAGE)
+            }.assertFalse { file ->
                 file.hasImport { import ->
                     import.name.startsWith("android.") || import.name.startsWith("androidx.")
                 }
@@ -33,8 +41,12 @@ class DomainLayerKonsistTest {
         Konsist
             .scopeFromProject()
             .files
-            .filter { it.packagee?.name.orEmpty().startsWith(DOMAIN_PACKAGE) }
-            .assertFalse { file ->
+            .filter {
+                it.packagee
+                    ?.name
+                    .orEmpty()
+                    .startsWith(DOMAIN_PACKAGE)
+            }.assertFalse { file ->
                 file.hasImport { import ->
                     import.name.startsWith("com.eaxor.easy2share.data") ||
                         import.name.startsWith("com.eaxor.easy2share.presentation")
@@ -64,4 +76,3 @@ class DomainLayerKonsistTest {
             }
     }
 }
-

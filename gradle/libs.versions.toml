@@ -17,6 +17,7 @@ ksp = "2.3.2"
 accompanist = "0.37.3"
 runtime = "1.11.4"
 material3Version = "1.4.0"
+slf4jSimple = "2.0.16"
 spotless = "8.8.0"
 leakcanary = "1.0.0"
 ktor = "3.5.1"
@@ -71,6 +72,7 @@ cameraView = { group = "androidx.camera", name = "camera-view", version.ref = "c
 cameraCore = { group = "androidx.camera", name = "camera-core", version.ref = "cameraX" }
 androidx-viewfinder-compose = { group = "androidx.camera.viewfinder", name = "viewfinder-compose", version.ref = "viewfinderCompose" }
 camera-compose = { group = "androidx.camera", name = "camera-compose", version.ref = "cameraX" }
+slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4jSimple" }
 switchy = { group = "dev.muazkadan", name = "switchy-compose", version = "0.7.2" }
 
 
