@@ -2,7 +2,6 @@
     <string name="app_name">easy2share</string>
 
     <!-- Welcome / Onboarding -->
-    <string name="welcome_skip">Skip</string>
     <string name="welcome_next">Next</string>
     <string name="welcome_get_started">Get Started</string>
     <string name="welcome_sent_stamp">SENT</string>
@@ -26,41 +25,30 @@
     <string name="dialog_welcome_message">Welcome bla bla</string>
     <string name="dialog_welcome_title">Permissions needed</string>
     <string name="cd_notifications">Notifications</string>
-    <string name="server_running">SHARING ON!</string>
-    <string name="ready_to_share">READY TO SHARE</string>
-    <string name="awaiting_authentications">AWAITING CLIENT(s)</string>
-    <string name="not_sharing">NOT SHARING</string>
-    <string name="enter_url_title">Enter the following URL into a web browser on PC</string>
     <string name="share_clipboard_title">Share Clipboard</string>
-    <string name="share_files_title">Share File</string>
     <string name="what">what?</string>
     <string name="how">How?</string>
 
     <!-- Home -->
     <string name="home_server_link">SERVER LINK</string>
     <string name="home_server_address">SERVER ADDRESS</string>
-    <string name="home_auth_pin">AUTH PIN</string>
     <string name="home_status_running">SHARING ON</string>
     <string name="home_status_stopped">NOT SHARING</string>
     <string name="home_status_permissions">PERMISSIONS REQUIRED</string>
     <string name="home_status_wifi">WIFI REQUIRED</string>
-    <string name="home_status_waiting">AWAITING CLIENTS</string>
     <string name="home_status_error">SYSTEM ERROR</string>
     <string name="home_status_clipboard">CLIPBOARD READY</string>
     <string name="home_connected_clients">CONNECTED CLIENTS</string>
-    <string name="home_client_count">CLIENTS // %1$s</string>
     <string name="home_no_clients">NO CLIENTS CONNECTED</string>
     <string name="home_no_clients_body">Open the server address on another device to establish a secure link.</string>
     <string name="home_client_secure">SECURE</string>
     <string name="home_client_fingerprint">FP %1$s</string>
     <string name="home_start_server">SHARING ON</string>
-    <string name="home_nav_settings">SETTINGS</string>
     <string name="scan_qr_code">Scan QR code</string>
     <string name="welcome_message">Easily share clipboard &amp; files</string>
     <string name="home_status_key_required">Need Encryption Key</string>
     <string name="try_again">TRY AGAIN</string>
     <string name="home_status_ready_to_share">READY 2 SHARE</string>
-    <string name="home_server_running">SHARING</string>
     <string name="home_server_stopped">NOT SHARING</string>
 
     <!-- Sharing foreground service notification -->
