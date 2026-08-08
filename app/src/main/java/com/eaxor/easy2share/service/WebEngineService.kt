@@ -23,7 +23,7 @@ import com.eaxor.easy2share.domain.webengine.buildWebsocketEngine
 import kotlinx.coroutines.Dispatchers
 
 /**
- * Foreground service hosting the embedded [com.eaxor.easy2share.domain.webengine.WebEngine]
+ * Foreground service hosting the embedded WebEngine server
  * server so sharing keeps running while the app is backgrounded.
  *
  * Started when the user flips the home screen switch to "SHARING ON" and fully
