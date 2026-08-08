@@ -162,7 +162,6 @@ private fun QrOverlay(
 
     Canvas(modifier = modifier) {
         val scaleX = size.width / sourceWidth
-        val scaleY = size.height / sourceHeight
         qrCodes.forEach { barcode ->
             val bounds = barcode.bounds ?: return@forEach
             drawRoundRect(
@@ -255,22 +254,3 @@ fun ErrorView(
     }
 }
 
-/**
- * Full-screen message shown when a sample cannot run on the current device (e.g. the camera lacks a
- * required capability such as extensions or high-speed recording).
- */
-@Composable
-fun UnsupportedView(
-    message: String,
-    modifier: Modifier = Modifier,
-) {
-    Box(
-        modifier =
-            modifier
-                .fillMaxSize()
-                .padding(32.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(text = message, color = Color.White)
-    }
-}
