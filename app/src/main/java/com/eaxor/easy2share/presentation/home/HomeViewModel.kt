@@ -42,7 +42,7 @@ class HomeViewModel
 
         val getIpAddress = GetIpAddressUseCase()
 
-        public fun setScannedKey(linkKeyRaw: ByteArray?) {
+        fun setScannedKey(linkKeyRaw: ByteArray?) {
             linkKey = linkKeyRaw
             // Never downgrade an active sharing session on recomposition.
             if (_uiState.value is HomeUiState.ServerRunning) return
