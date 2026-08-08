@@ -13,5 +13,6 @@
         <option value="easy2share.app" />
       </list>
     </option>
+    <option name="applyOnRootProject" value="true" />
   </component>
 </project>

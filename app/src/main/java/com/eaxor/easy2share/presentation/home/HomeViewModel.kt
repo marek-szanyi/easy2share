@@ -5,13 +5,10 @@
  */
 package com.eaxor.easy2share.presentation.home
 
-import android.Manifest
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.eaxor.easy2share.Constants
-import com.eaxor.easy2share.Easy2ShareApplication
 import com.eaxor.easy2share.domain.usecase.GetClipboardContentUseCase
-import com.eaxor.easy2share.domain.usecase.GetGreetingUseCase
 import com.eaxor.easy2share.domain.usecase.GetIpAddressUseCase
 import com.eaxor.easy2share.domain.webengine.notifyClients
 import dagger.hilt.android.lifecycle.HiltViewModel

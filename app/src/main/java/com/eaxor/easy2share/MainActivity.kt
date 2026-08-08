@@ -5,7 +5,6 @@
  */
 package com.eaxor.easy2share
 
-import android.content.pm.ApplicationInfo
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
@@ -31,9 +30,7 @@ import com.eaxor.easy2share.presentation.onboarding.WelcomeViewModel
 import com.eaxor.easy2share.presentation.permissions.PermissionDialogs
 import com.eaxor.easy2share.presentation.scanning.ScannerScreen
 import com.eaxor.easy2share.presentation.scanning.ScannerViewModel
-import com.eaxor.easy2share.service.WebEngineService
 import com.eaxor.easy2share.ui.theme.Easy2shareTheme
-import com.eaxor.easy2share.ui.theme.HazardYellow
 import com.eaxor.easy2share.ui.theme.IndustrialInk
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -71,7 +68,6 @@ private fun Easy2ShareApp() {
 
     when {
         uiState.isLoading -> {
-            Unit
         }
 
         uiState.onboardingCompleted -> {
