@@ -9,8 +9,8 @@ import android.app.Activity
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.eaxor.easy2share.domain.repository.PermissionRepository
-import com.eaxor.easy2share.domain.repository.SettingsRepository
+import com.eaxor.easy2share.data.repository.PermissionRepository
+import com.eaxor.easy2share.data.repository.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

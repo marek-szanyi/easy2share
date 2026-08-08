@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2026 Eaxor llc.
+ * SPDX-License-Identifier: MIT
+ * Licensed under the MIT License. See LICENSE file in the project root for full license information.
+ */
 package com.eaxor.easy2share.konsist
 
 import com.lemonappdev.konsist.api.Konsist
@@ -16,7 +21,6 @@ import org.junit.Test
  * modelled as layers: wiring everything together is exactly their job.
  */
 class CleanArchitectureLayerTest {
-
     @Test
     fun `clean architecture layers respect the dependency rule`() {
         Konsist
@@ -32,4 +36,3 @@ class CleanArchitectureLayerTest {
             }
     }
 }
-

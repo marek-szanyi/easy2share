@@ -1,5 +1,9 @@
+/*
+ * Copyright (c) 2026 Eaxor llc.
+ * SPDX-License-Identifier: MIT
+ * Licensed under the MIT License. See LICENSE file in the project root for full license information.
+ */
 package com.eaxor.easy2share.presentation.scanning
-
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -11,53 +15,53 @@ import kotlin.io.encoding.Base64
 
 @HiltViewModel
 class ScannerViewModel
-@Inject
-constructor() : ViewModel() {
-    private val _uiState =
-        MutableStateFlow<ScannerUiState>(ScannerUiState.Initial)
-    val uiState: StateFlow<ScannerUiState> = _uiState.asStateFlow()
-    var linkKeyRaw: ByteArray? = null
-        private set
+    @Inject
+    constructor() : ViewModel() {
+        private val _uiState =
+            MutableStateFlow<ScannerUiState>(ScannerUiState.Initial)
+        val uiState: StateFlow<ScannerUiState> = _uiState.asStateFlow()
+        var linkKeyRaw: ByteArray? = null
+            private set
 
-    fun initialize() {
-        if (_uiState.value is ScannerUiState.Initial) {
-            _uiState.value = ScannerUiState.Scanning(emptyList(), 0, 0)
-        }
-    }
-
-    fun setQrCodes(
-        qrCodes: List<DetectedQr>,
-        sourceWidth: Int,
-        sourceHeight: Int,
-    ) {
-        if (_uiState.value !is ScannerUiState.Scanning) return
-
-        val qrCode = qrCodes.firstOrNull { it.value.isNotBlank() }
-        if (qrCode == null) {
-            _uiState.value = ScannerUiState.Scanning(qrCodes, sourceWidth, sourceHeight)
-            return
+        fun initialize() {
+            if (_uiState.value is ScannerUiState.Initial) {
+                _uiState.value = ScannerUiState.Scanning(emptyList(), 0, 0)
+            }
         }
 
-        val decodedLinkKey =
-            try {
-                Base64.decode(qrCode.value)
-            } catch (_: IllegalArgumentException) {
-                _uiState.value =
-                    ScannerUiState.Error("The detected QR code does not contain a valid link key.")
+        fun setQrCodes(
+            qrCodes: List<DetectedQr>,
+            sourceWidth: Int,
+            sourceHeight: Int,
+        ) {
+            if (_uiState.value !is ScannerUiState.Scanning) return
+
+            val qrCode = qrCodes.firstOrNull { it.value.isNotBlank() }
+            if (qrCode == null) {
+                _uiState.value = ScannerUiState.Scanning(qrCodes, sourceWidth, sourceHeight)
                 return
             }
 
-        linkKeyRaw = decodedLinkKey
-        _uiState.value = ScannerUiState.Finished(qrCode)
-    }
+            val decodedLinkKey =
+                try {
+                    Base64.decode(qrCode.value)
+                } catch (_: IllegalArgumentException) {
+                    _uiState.value =
+                        ScannerUiState.Error("The detected QR code does not contain a valid link key.")
+                    return
+                }
 
-    fun resetError() {
-        _uiState.value = ScannerUiState.Scanning(emptyList(), 0, 0)
-    }
+            linkKeyRaw = decodedLinkKey
+            _uiState.value = ScannerUiState.Finished(qrCode)
+        }
 
-    fun onScanResultHandled() {
-        if (_uiState.value is ScannerUiState.Finished) {
-            _uiState.value = ScannerUiState.Initial
+        fun resetError() {
+            _uiState.value = ScannerUiState.Scanning(emptyList(), 0, 0)
+        }
+
+        fun onScanResultHandled() {
+            if (_uiState.value is ScannerUiState.Finished) {
+                _uiState.value = ScannerUiState.Initial
+            }
         }
     }
-}

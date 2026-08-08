@@ -31,12 +31,15 @@ import kotlinx.coroutines.Dispatchers
  * to "NOT SHARING".
  */
 class WebEngineService : Service() {
-
     private var webEngine: TlsWebsocketEngine? = null
 
     override fun onBind(intent: Intent?): IBinder? = null
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    override fun onStartCommand(
+        intent: Intent?,
+        flags: Int,
+        startId: Int,
+    ): Int {
         if (intent?.action == ACTION_START) {
             val linkKey = intent.getByteArrayExtra(EXTRA_LINK_KEY) ?: ByteArray(0)
             val port = intent.getIntExtra(EXTRA_PORT, Constants.DEFAULT_PORT)
@@ -56,7 +59,10 @@ class WebEngineService : Service() {
         super.onDestroy()
     }
 
-    private fun startWebEngine(port: Int, linkKey: ByteArray) {
+    private fun startWebEngine(
+        port: Int,
+        linkKey: ByteArray,
+    ) {
         if (webEngine != null) return
         webEngine =
             buildWebsocketEngine(Dispatchers.IO, port, linkKey).also {
@@ -89,7 +95,8 @@ class WebEngineService : Service() {
                 PendingIntent.FLAG_IMMUTABLE,
             )
 
-        return Notification.Builder(this, CHANNEL_ID)
+        return Notification
+            .Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_contactless)
             .setContentTitle(getString(R.string.sharing_notification_title))
             .setContentText(getString(R.string.sharing_notification_text))
@@ -109,7 +116,11 @@ class WebEngineService : Service() {
         private const val SERVER_STOP_TIMEOUT_MILLIS = 1_000L
 
         /** Starts the foreground service and the embedded web server. */
-        fun start(context: Context, linkKey: ByteArray, port: Int = Constants.DEFAULT_PORT) {
+        fun start(
+            context: Context,
+            linkKey: ByteArray,
+            port: Int = Constants.DEFAULT_PORT,
+        ) {
             val intent =
                 Intent(context, WebEngineService::class.java)
                     .setAction(ACTION_START)

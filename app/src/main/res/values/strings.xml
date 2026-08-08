@@ -67,5 +67,10 @@
     <string name="sharing_notification_channel_name">Sharing service</string>
     <string name="sharing_notification_title">Sharing is ON</string>
     <string name="sharing_notification_text">The easy2share server is running and reachable on your local network.</string>
-    <string name="home_key_missing_toast">Scan the QR code first to obtain an encryption key before sharing.</string>
+    <string name="home_key_missing_toast">Scan the QR code first to get an encryption key before sharing.</string>
+    <string name="home_clipboard_shared_toast">Clipboard shared with connected clients.</string>
+    <string name="home_clipboard_empty_toast">Clipboard is empty — nothing to share.</string>
+    <string name="home_sharing_not_active_toast">Turn sharing on before sharing the clipboard.</string>
+    <string name="home_start_by_visiting_on_your_pc">1st: On second device open:</string>
+    <string name="home_official_getlink">https://getsharing.link</string>
 </resources>

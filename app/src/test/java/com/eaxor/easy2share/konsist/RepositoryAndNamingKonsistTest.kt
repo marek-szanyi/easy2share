@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2026 Eaxor llc.
+ * SPDX-License-Identifier: MIT
+ * Licensed under the MIT License. See LICENSE file in the project root for full license information.
+ */
 package com.eaxor.easy2share.konsist
 
 import com.lemonappdev.konsist.api.Konsist
@@ -11,7 +16,6 @@ import org.junit.Test
  * make the Clean Architecture split enforceable and self-documenting.
  */
 class RepositoryAndNamingKonsistTest {
-
     @Test
     fun `repository abstractions are interfaces that live in the domain layer`() {
         Konsist
@@ -46,10 +50,13 @@ class RepositoryAndNamingKonsistTest {
         Konsist
             .scopeFromProject()
             .files
-            .filter { it.packagee?.name.orEmpty().startsWith("com.eaxor.easy2share.presentation") }
-            .assertFalse { file ->
+            .filter {
+                it.packagee
+                    ?.name
+                    .orEmpty()
+                    .startsWith("com.eaxor.easy2share.presentation")
+            }.assertFalse { file ->
                 file.hasImport { import -> import.name.startsWith("com.eaxor.easy2share.data") }
             }
     }
 }
-

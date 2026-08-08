@@ -1,7 +1,12 @@
+/*
+ * Copyright (c) 2026 Eaxor llc.
+ * SPDX-License-Identifier: MIT
+ * Licensed under the MIT License. See LICENSE file in the project root for full license information.
+ */
 package com.eaxor.easy2share.presentation.scanning
 
-import androidx.camera.core.SurfaceRequest
 import androidx.camera.compose.CameraXViewfinder
+import androidx.camera.core.SurfaceRequest
 import androidx.camera.viewfinder.compose.MutableCoordinateTransformer
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -40,7 +45,6 @@ import com.eaxor.easy2share.R
 import com.eaxor.easy2share.presentation.components.BrutalistActionButton
 import com.eaxor.easy2share.ui.theme.HazardYellow
 
-
 @Composable
 fun ScannerScreen(
     onScanFinished: () -> Unit,
@@ -73,7 +77,9 @@ fun ScannerScreen(
                 )
             }
 
-            is ScannerUiState.Finished -> Unit
+            is ScannerUiState.Finished -> {
+                Unit
+            }
         }
     }
 }
@@ -143,7 +149,6 @@ private fun BoxScope.ScanningContent(
 //    )
 }
 
-
 @Composable
 private fun QrOverlay(
     qrCodes: List<DetectedQr>,
@@ -171,17 +176,14 @@ private fun QrOverlay(
                 size =
                     Size(
                         width = bounds.width().dp.toPx() * scaleX,
-                        height = bounds.height().dp.toPx() * scaleX ,
+                        height = bounds.height().dp.toPx() * scaleX,
                     ),
-
                 cornerRadius = CornerRadius(cornerRadiusPx, cornerRadiusPx),
                 style = Stroke(width = strokeWidthPx),
             )
         }
     }
 }
-
-
 
 /**
  * Renders a CameraX [SurfaceRequest] into a [CameraXViewfinder] with tap-to-focus support.
@@ -220,7 +222,6 @@ fun CameraXPreview(
     )
 }
 
-
 @Composable
 fun LoadingView(modifier: Modifier = Modifier) {
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -236,11 +237,10 @@ fun ErrorView(
     modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier = modifier
-            .fillMaxSize(),
+        modifier =
+            modifier
+                .fillMaxSize(),
         contentAlignment = Alignment.BottomEnd,
-
-
     ) {
         Text(
             text = errorMessage ?: "Unknown Error",
