@@ -22,15 +22,34 @@ android {
         minSdk = 35
         targetSdk = 37
         versionCode = 1
-        versionName = "1.0"
+        versionName = "0.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
-        release {
+        debug {
+            enableUnitTestCoverage = true
+            enableAndroidTestCoverage = true
+            applicationIdSuffix = ".debug"
+            multiDexEnabled = false
             optimization {
                 enable = false
+                isDebuggable = true
+            }
+        }
+        release {
+            applicationIdSuffix = ".release"
+            isMinifyEnabled = true
+            isShrinkResources = true
+            multiDexEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            optimization {
+                enable = true
+                isDebuggable = false
             }
         }
     }
@@ -46,6 +65,7 @@ android {
             // Netty jars ship overlapping metadata files that break APK resource merging.
             excludes += "META-INF/INDEX.LIST"
             excludes += "META-INF/io.netty.versions.properties"
+            excludes += "META-INF/services/reactor.blockhound.integration.BlockHoundIntegration"
         }
     }
 }

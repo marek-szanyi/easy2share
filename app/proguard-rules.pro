@@ -1,0 +1,8 @@
+-dontwarn io.netty.internal.tcnative.**
+-dontwarn java.lang.management.**
+-dontwarn javax.naming.ldap.**
+-dontwarn jdk.jfr.**
+-dontwarn org.apache.log4j.**
+-dontwarn org.apache.logging.log4j.**
+-dontwarn org.bouncycastle.**
+-dontwarn io.netty.**
