@@ -21,9 +21,9 @@
     <string name="dialog_open_settings">Android Settings</string>
     <string name="action_skip">Skip</string>
     <string name="action_enable">Enable</string>
-    <string name="dialog_welcome_note">Welcome note bla bla bla</string>
-    <string name="dialog_welcome_message">Welcome bla bla</string>
-    <string name="dialog_welcome_title">Permissions needed</string>
+    <string name="dialog_welcome_note">The application needs permission to submit notifications because it needs to start a foreground service used for sharing.</string>
+    <string name="dialog_welcome_message">Permission for Notifications</string>
+    <string name="dialog_welcome_title">Permissions Needed</string>
     <string name="cd_notifications">Notifications</string>
     <string name="share_clipboard_title">Share Clipboard</string>
     <string name="what">what?</string>
