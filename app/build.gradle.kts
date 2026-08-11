@@ -12,6 +12,14 @@ plugins {
 }
 
 android {
+    signingConfigs {
+        create("eaxor_release") {
+            storeFile = file("$rootDir/keystore.jks")
+            storePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD") ?: ""
+            keyAlias = System.getenv("ANDROID_KEY_ALIAS") ?: ""
+            keyPassword = System.getenv("ANDROID_KEY_PASSWORD") ?: ""
+        }
+    }
     namespace = "com.eaxor.easy2share"
     compileSdk {
         version = release(37)
@@ -47,6 +55,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("eaxor_release")
             optimization {
                 enable = true
                 isDebuggable = false
