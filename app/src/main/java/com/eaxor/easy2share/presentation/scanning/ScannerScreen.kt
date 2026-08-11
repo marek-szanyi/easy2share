@@ -13,7 +13,6 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.QrCode
 import androidx.compose.material3.CircularProgressIndicator
@@ -77,7 +76,6 @@ fun ScannerScreen(
             }
 
             is ScannerUiState.Finished -> {
-                Unit
             }
         }
     }
@@ -253,4 +251,3 @@ fun ErrorView(
         )
     }
 }
-
