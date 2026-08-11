@@ -76,7 +76,7 @@ fun buildWebsocketEngine(
     port: Int,
     key: ByteArray,
 ): TlsWebsocketEngine {
-    require(key.isNotEmpty()) { "Session key must not be empty" }
+    require(key.size == 32) { "Session key must be 32 bytes (ChaCha20-Poly1305)" }
     return embeddedServer(Netty, applicationEnvironment {}, {
         connector { this.port = port }
         enableHttp2 = false
