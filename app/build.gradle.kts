@@ -19,6 +19,12 @@ android {
             keyAlias = System.getenv("ANDROID_KEY_ALIAS") ?: ""
             keyPassword = System.getenv("ANDROID_KEY_PASSWORD") ?: ""
         }
+        create("play") {
+            storeFile = file("H:\\code\\eaxor-keystore\\eaxor")
+            storePassword = "eaxorcrt"
+            keyAlias = "eaxor"
+            keyPassword = "eaxorcrt"
+        }
     }
     namespace = "com.eaxor.easy2share"
     compileSdk {
@@ -29,8 +35,8 @@ android {
         applicationId = "com.eaxor.easy2share"
         minSdk = 35
         targetSdk = 37
-        versionCode = 1
-        versionName = "0.0.1"
+        versionCode = 2
+        versionName = "0.0.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -47,7 +53,6 @@ android {
             }
         }
         release {
-            applicationIdSuffix = ".release"
             isMinifyEnabled = true
             isShrinkResources = true
             multiDexEnabled = false
@@ -55,7 +60,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
-            signingConfig = signingConfigs.getByName("eaxor_release")
+            signingConfig = signingConfigs.getByName("play")
             optimization {
                 enable = true
                 isDebuggable = false
