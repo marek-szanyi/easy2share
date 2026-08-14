@@ -5,6 +5,7 @@
  */
 package com.eaxor.easy2share.presentation.onboarding
 
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState
@@ -96,6 +97,7 @@ fun WelcomeScreen(
  * The industrial presentation deliberately uses exposed structure, hard borders,
  * high-contrast utility colors, and abrupt rectangular controls.
  */
+@SuppressLint("FrequentlyChangingValue")
 @Composable
 fun WelcomeScreen(
     uiState: WelcomeUiState,
@@ -136,7 +138,6 @@ fun WelcomeScreen(
                 currentPage = pagerState.currentPage,
                 pageCount = pages.size,
                 isLastPage = isLastPage,
-                onFinished = onFinished,
                 modifier =
                     Modifier
                         .fillMaxWidth()
@@ -195,7 +196,6 @@ private fun WelcomeHeader(
     currentPage: Int,
     pageCount: Int,
     isLastPage: Boolean,
-    onFinished: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -274,28 +274,8 @@ private fun WelcomePageContent(
 
         Spacer(Modifier.height(22.dp))
 
-//        Text(
-//            text = stringResource(page.kicker).uppercase(),
-//            modifier =
-//                Modifier
-//                    .background(HazardYellow)
-//                    .border(2.dp, IndustrialInk)
-//                    .padding(horizontal = 9.dp, vertical = 5.dp),
-//            color = IndustrialInk,
-//            fontFamily = FontFamily.Monospace,
-//            fontSize = 12.sp,
-//            fontWeight = FontWeight.Black,
-//            letterSpacing = 2.sp,
-//        )
         Spacer(Modifier.height(4.dp))
-        Text(
-            text = stringResource(page.title),
-            color = IndustrialInk,
-            fontWeight = FontWeight.Black,
-            fontSize = 40.sp,
-            lineHeight = 40.sp,
-            letterSpacing = (-1).sp,
-        )
+
         Spacer(Modifier.height(12.dp))
         Box(
             modifier =
@@ -416,7 +396,7 @@ private fun PageIllustration(
     when (illustration) {
         WelcomeIllustration.FILE_PRESS -> {
             Text(
-                text = stringResource(R.string.welcome_message),
+                text = stringResource(R.string.welcome_1_headline),
                 color = IndustrialInk,
                 fontFamily = FontFamily.Default,
                 fontWeight = FontWeight.Black,

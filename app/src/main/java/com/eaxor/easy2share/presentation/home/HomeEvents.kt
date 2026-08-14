@@ -38,5 +38,4 @@ sealed class HomeEvents {
     object ClipboardEmpty : HomeEvents()
 
     object SharingNotActive : HomeEvents()
-
 }

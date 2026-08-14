@@ -47,7 +47,7 @@ class WebEngineService : Service() {
             startForeground(
                 NOTIFICATION_ID,
                 buildNotification(),
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE,
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC,
             )
             startWebEngine(port, linkKey)
         }

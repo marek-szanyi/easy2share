@@ -70,13 +70,16 @@ fun CameraScaffold(
     val launcher =
         rememberLauncherForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions(),
-        ) {
+        ) { results ->
             hasPermission = allGranted()
             if (!hasPermission && activity != null) {
                 permanentlyDenied =
-                    permissions.any {
-                        !ActivityCompat.shouldShowRequestPermissionRationale(activity, it)
-                    }
+                    results
+                        .filterValues { granted -> !granted }
+                        .keys
+                        .any { permission ->
+                            !ActivityCompat.shouldShowRequestPermissionRationale(activity, permission)
+                        }
             }
         }
 

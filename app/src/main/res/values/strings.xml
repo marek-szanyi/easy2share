@@ -7,9 +7,9 @@
     <string name="welcome_sent_stamp">SENT</string>
 
     <string name="welcome_1_kicker">EASY2SHARE</string>
-    <string name="welcome_1_title">with other devices</string>
+    <string name="welcome_1_title">secure by design</string>
     <string name="welcome_1_body">No cloud! No second-device installation.</string>
-
+    <string name="welcome_1_headline">Easily share clipboard</string>
     <string name="welcome_2_kicker">STAY IN SYNC</string>
     <string name="welcome_2_title">Secure Wireless Link</string>
     <string name="welcome_2_body">Your phone and PC talk over an encrypted connection. It\'s safe to share even passwords!</string>
@@ -45,7 +45,6 @@
     <string name="home_client_fingerprint">FP %1$s</string>
     <string name="home_start_server">SHARING ON</string>
     <string name="scan_qr_code">Scan QR code</string>
-    <string name="welcome_message">Easily share clipboard &amp; files</string>
     <string name="home_status_key_required">Need Encryption Key</string>
     <string name="try_again">TRY AGAIN</string>
     <string name="home_status_ready_to_share">READY 2 SHARE</string>
