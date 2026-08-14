@@ -19,12 +19,6 @@ android {
             keyAlias = System.getenv("ANDROID_KEY_ALIAS") ?: ""
             keyPassword = System.getenv("ANDROID_KEY_PASSWORD") ?: ""
         }
-        create("play") {
-            storeFile = file("H:\\code\\eaxor-keystore\\eaxor")
-            storePassword = "eaxorcrt"
-            keyAlias = "eaxor"
-            keyPassword = "eaxorcrt"
-        }
     }
     namespace = "com.eaxor.easy2share"
     compileSdk {
@@ -60,7 +54,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
-            signingConfig = signingConfigs.getByName("play")
+            signingConfig = signingConfigs.getByName("eaxor_release")
             optimization {
                 enable = true
                 isDebuggable = false
