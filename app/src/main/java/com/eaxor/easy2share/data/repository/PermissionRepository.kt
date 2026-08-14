@@ -37,7 +37,7 @@ class PermissionRepository
         /**
          * All permissions required to run the embedded web server as a foreground service.
          *
-         * The list is API-aware: [Manifest.permission.FOREGROUND_SERVICE_SPECIAL_USE] and
+         * The list is API-aware: [Manifest.permission.FOREGROUND_SERVICE_DATA_SYNC] and
          * [Manifest.permission.POST_NOTIFICATIONS] only exist / are enforced on newer platforms.
          */
         val requiredServicePermissions: List<String>
@@ -48,7 +48,7 @@ class PermissionRepository
                     add(Manifest.permission.ACCESS_WIFI_STATE)
                     add(Manifest.permission.CHANGE_NETWORK_STATE)
                     add(Manifest.permission.FOREGROUND_SERVICE)
-                    add(Manifest.permission.FOREGROUND_SERVICE_SPECIAL_USE)
+                    add(Manifest.permission.FOREGROUND_SERVICE_DATA_SYNC)
                     add(Manifest.permission.POST_NOTIFICATIONS)
                 }
 
