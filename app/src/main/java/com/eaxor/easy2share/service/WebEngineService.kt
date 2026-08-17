@@ -18,8 +18,8 @@ import android.util.Log
 import com.eaxor.easy2share.Constants
 import com.eaxor.easy2share.MainActivity
 import com.eaxor.easy2share.R
-import com.eaxor.easy2share.domain.webengine.TlsWebsocketEngine
-import com.eaxor.easy2share.domain.webengine.buildWebsocketEngine
+import com.eaxor.easy2share.data.webengine.TlsWebsocketEngine
+import com.eaxor.easy2share.data.webengine.buildWebsocketEngine
 import kotlinx.coroutines.Dispatchers
 
 /**

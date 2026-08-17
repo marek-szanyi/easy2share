@@ -6,17 +6,16 @@
 package com.eaxor.easy2share.data.repository
 
 import android.Manifest
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
+import com.eaxor.easy2share.domain.repository.PermissionRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -24,11 +23,11 @@ import javax.inject.Inject
 
 private val Context.permissionDataStore by preferencesDataStore(name = "permissions_prefs")
 
-class PermissionRepository
+class PermissionRepositoryImpl
     @Inject
     constructor(
         @ApplicationContext private val context: Context,
-    ) {
+    ) : PermissionRepository {
         companion object {
             private val FIRST_LAUNCH_KEY = booleanPreferencesKey("first_launch")
             private val NOTIFICATION_REQUESTED_KEY = booleanPreferencesKey("notification_requested")
@@ -65,40 +64,30 @@ class PermissionRepository
             ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
 
         /** Runtime permissions still missing before the foreground service can be started. */
-        fun getMissingRuntimePermissions(): List<String> = runtimeServicePermissions.filterNot { isPermissionGranted(it) }
+        override fun getMissingRuntimePermissions(): List<String> = runtimeServicePermissions.filterNot { isPermissionGranted(it) }
 
         /** `true` when every runtime permission needed by the web server service is granted. */
-        fun areAllRuntimePermissionsGranted(): Boolean = getMissingRuntimePermissions().isEmpty()
+        override fun areAllRuntimePermissionsGranted(): Boolean = getMissingRuntimePermissions().isEmpty()
 
-        /**
-         * Whether the system suggests showing a rationale for [permission]. Returns `false` when the
-         * permission was permanently denied ("don't ask again"), which the caller can use to route the
-         * user to the app settings screen instead.
-         */
-        fun shouldShowRationale(
-            activity: Activity,
-            permission: String,
-        ): Boolean = ActivityCompat.shouldShowRequestPermissionRationale(activity, permission)
-
-        val isFirstLaunch: Flow<Boolean> =
+        override val isFirstLaunch: Flow<Boolean> =
             context.permissionDataStore.data
                 .map { preferences ->
                     preferences[FIRST_LAUNCH_KEY] ?: true
                 }
 
-        suspend fun setFirstLaunchComplete() {
+        override suspend fun setFirstLaunchComplete() {
             context.permissionDataStore.edit { preferences ->
                 preferences[FIRST_LAUNCH_KEY] = false
             }
         }
 
-        suspend fun setNotificationRequested() {
+        override suspend fun setNotificationRequested() {
             context.permissionDataStore.edit { preferences ->
                 preferences[NOTIFICATION_REQUESTED_KEY] = true
             }
         }
 
-        fun openAppSettings() {
+        override fun openAppSettings() {
             val intent =
                 Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
                     data = Uri.fromParts("package", context.packageName, null)

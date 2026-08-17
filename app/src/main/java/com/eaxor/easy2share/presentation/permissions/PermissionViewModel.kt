@@ -6,11 +6,10 @@
 package com.eaxor.easy2share.presentation.permissions
 
 import android.app.Activity
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.core.app.ActivityCompat
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.eaxor.easy2share.data.repository.PermissionRepository
-import com.eaxor.easy2share.data.repository.SettingsRepository
+import com.eaxor.easy2share.domain.repository.PermissionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -44,9 +43,7 @@ class PermissionViewModel
     @Inject
     constructor(
         private val permissionRepository: PermissionRepository,
-        private val settingsRepository: SettingsRepository,
-        application: Application,
-    ) : AndroidViewModel(application) {
+    ) : ViewModel() {
         private val _uiState = MutableStateFlow(PermissionUiState())
         val uiState: StateFlow<PermissionUiState> = _uiState.asStateFlow()
 
@@ -80,7 +77,6 @@ class PermissionViewModel
          */
         fun onAllPermissionsAlreadyGranted() {
             viewModelScope.launch {
-                settingsRepository.updateBackgroundServiceEnabled(true)
                 refreshPermissionState()
                 dismissFirstLaunchDialog()
             }
@@ -103,7 +99,6 @@ class PermissionViewModel
         ) {
             viewModelScope.launch {
                 if (permissionRepository.areAllRuntimePermissionsGranted()) {
-                    settingsRepository.updateBackgroundServiceEnabled(true)
                     _uiState.update { it.copy(showPermissionRationale = false) }
                 } else {
                     // A permission that was denied and can no longer show a rationale has been
@@ -114,7 +109,7 @@ class PermissionViewModel
                             .keys
                             .any { permission ->
                                 activity != null &&
-                                    !permissionRepository.shouldShowRationale(
+                                    !ActivityCompat.shouldShowRequestPermissionRationale(
                                         activity,
                                         permission,
                                     )

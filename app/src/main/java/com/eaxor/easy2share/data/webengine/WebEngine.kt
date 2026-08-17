@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  * Licensed under the MIT License. See LICENSE file in the project root for full license information.
  */
-package com.eaxor.easy2share.domain.webengine
+package com.eaxor.easy2share.data.webengine
 
 import android.util.Log
 import com.eaxor.easy2share.data.network.ClipboardSharingMessage

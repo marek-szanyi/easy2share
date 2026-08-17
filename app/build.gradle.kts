@@ -11,19 +11,29 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
+val releaseKeystore = System.getenv("ANDROID_KEYSTORE_FILE")?.let(::file) ?: rootProject.file("keystore.jks")
+val releaseStorePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD").orEmpty()
+val releaseKeyAlias = System.getenv("ANDROID_KEY_ALIAS").orEmpty()
+val releaseKeyPassword = System.getenv("ANDROID_KEY_PASSWORD").orEmpty()
+val releaseSigningValues = listOf(releaseStorePassword, releaseKeyAlias, releaseKeyPassword)
+val hasReleaseSigningConfiguration = releaseSigningValues.any(String::isNotBlank)
+
+require(!hasReleaseSigningConfiguration || releaseSigningValues.all(String::isNotBlank)) {
+    "Release signing requires ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, and ANDROID_KEY_PASSWORD."
+}
+require(!hasReleaseSigningConfiguration || releaseKeystore.isFile) {
+    "Release keystore does not exist: $releaseKeystore"
+}
+
 android {
     signingConfigs {
-        create("eaxor_release") {
-            storeFile = file("$rootDir/keystore.jks")
-            storePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD") ?: ""
-            keyAlias = System.getenv("ANDROID_KEY_ALIAS") ?: ""
-            keyPassword = System.getenv("ANDROID_KEY_PASSWORD") ?: ""
-        }
-        create("play") {
-            storeFile = file("H:\\code\\eaxor-keystore\\eaxor")
-            storePassword = "eaxorcrt"
-            keyAlias = "eaxor"
-            keyPassword = "eaxorcrt"
+        if (hasReleaseSigningConfiguration) {
+            create("release") {
+                storeFile = releaseKeystore
+                storePassword = releaseStorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+            }
         }
     }
     namespace = "com.eaxor.easy2share"
@@ -60,7 +70,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
-            signingConfig = signingConfigs.getByName("play")
+            signingConfig = signingConfigs.findByName("release")
             optimization {
                 enable = true
                 isDebuggable = false

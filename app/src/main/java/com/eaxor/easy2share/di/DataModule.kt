@@ -7,8 +7,14 @@ package com.eaxor.easy2share.di
 
 import com.eaxor.easy2share.data.local.OnboardingLocalDataSource
 import com.eaxor.easy2share.data.local.OnboardingPreferencesDataSource
+import com.eaxor.easy2share.data.repository.ClipboardRepositoryImpl
+import com.eaxor.easy2share.data.repository.NetworkRepositoryImpl
 import com.eaxor.easy2share.data.repository.OnboardingRepositoryImpl
+import com.eaxor.easy2share.data.repository.PermissionRepositoryImpl
+import com.eaxor.easy2share.domain.repository.ClipboardRepository
+import com.eaxor.easy2share.domain.repository.NetworkRepository
 import com.eaxor.easy2share.domain.repository.OnboardingRepository
+import com.eaxor.easy2share.domain.repository.PermissionRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -31,4 +37,16 @@ abstract class DataModule {
     @Binds
     @Singleton
     abstract fun bindOnboardingRepository(impl: OnboardingRepositoryImpl): OnboardingRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindClipboardRepository(impl: ClipboardRepositoryImpl): ClipboardRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindNetworkRepository(impl: NetworkRepositoryImpl): NetworkRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindPermissionRepository(impl: PermissionRepositoryImpl): PermissionRepository
 }
