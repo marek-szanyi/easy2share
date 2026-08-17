@@ -10,7 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.eaxor.easy2share.Constants
 import com.eaxor.easy2share.domain.usecase.GetClipboardContentUseCase
 import com.eaxor.easy2share.domain.usecase.GetIpAddressUseCase
-import com.eaxor.easy2share.domain.webengine.notifyClients
+import com.eaxor.easy2share.domain.usecase.ShareClipboardContentUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,14 +33,14 @@ class HomeViewModel
     @Inject
     constructor(
         private val getClipboardContent: GetClipboardContentUseCase,
+        private val getIpAddress: GetIpAddressUseCase,
+        private val shareClipboardContent: ShareClipboardContentUseCase,
     ) : ViewModel() {
         val serverAddress: String
             get() {
                 return "${getIpAddress()}:${Constants.DEFAULT_PORT}"
             }
         private var linkKey: ByteArray? = null
-
-        val getIpAddress = GetIpAddressUseCase()
 
         fun setScannedKey(linkKeyRaw: ByteArray?) {
             linkKey = linkKeyRaw
@@ -105,7 +105,7 @@ class HomeViewModel
                 if (content.isNullOrEmpty()) {
                     _events.emit(HomeEvents.ClipboardEmpty)
                 } else {
-                    notifyClients.send(content)
+                    shareClipboardContent(content)
                     _events.emit(HomeEvents.ClipboardShared)
                 }
             }

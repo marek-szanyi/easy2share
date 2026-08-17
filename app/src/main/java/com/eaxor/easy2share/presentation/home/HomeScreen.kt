@@ -49,7 +49,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.eaxor.easy2share.R
+import com.eaxor.easy2share.domain.repository.ClipboardRepository
+import com.eaxor.easy2share.domain.repository.NetworkRepository
 import com.eaxor.easy2share.domain.usecase.GetClipboardContentUseCase
+import com.eaxor.easy2share.domain.usecase.GetIpAddressUseCase
+import com.eaxor.easy2share.domain.usecase.ShareClipboardContentUseCase
 import com.eaxor.easy2share.presentation.components.BrutalistActionButton
 import com.eaxor.easy2share.presentation.components.BrutalistBackdrop
 import com.eaxor.easy2share.presentation.components.HazardStripe
@@ -640,6 +644,25 @@ private fun HomeUiState.statusLabel(): Int =
 
 private fun Int.twoDigits(): String = toString().padStart(2, '0')
 
+private val previewClipboardRepository =
+    object : ClipboardRepository {
+        override suspend fun getContent(): String? = null
+
+        override suspend fun share(content: String) = Unit
+    }
+
+private val previewNetworkRepository =
+    object : NetworkRepository {
+        override fun getIpAddress(): String = "192.168.0.25"
+    }
+
+private fun previewHomeViewModel() =
+    HomeViewModel(
+        getClipboardContent = GetClipboardContentUseCase(previewClipboardRepository),
+        getIpAddress = GetIpAddressUseCase(previewNetworkRepository),
+        shareClipboardContent = ShareClipboardContentUseCase(previewClipboardRepository),
+    )
+
 @SuppressLint("ViewModelConstructorInComposable")
 @Preview(showBackground = true, widthDp = 411, heightDp = 891)
 @Composable
@@ -647,7 +670,7 @@ private fun HomeScreenPreview() {
     Easy2shareTheme(darkTheme = false) {
         HomeScreen(
             uiState = HomeUiState.Scanning,
-            viewModel = HomeViewModel(GetClipboardContentUseCase(LocalContext.current)),
+            viewModel = previewHomeViewModel(),
 //                HomeUiState.ServerRunning(
 //                    serverAddress = "192.168.0.25",
 //                    serverPort = 8080,
@@ -669,7 +692,7 @@ private fun EmptyHomeScreenPreview() {
                     serverAddress = "192.168.0.25",
                     serverPort = 8080,
                 ),
-            viewModel = HomeViewModel(GetClipboardContentUseCase(LocalContext.current)),
+            viewModel = previewHomeViewModel(),
         )
     }
 }
