@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Eaxor llc.
+ * Copyright (c) 2026 Eaxor LLC.
  * SPDX-License-Identifier: MIT
  * Licensed under the MIT License. See LICENSE file in the project root for full license information.
  */
@@ -11,6 +11,7 @@ import com.eaxor.easy2share.Constants
 import com.eaxor.easy2share.domain.usecase.GetClipboardContentUseCase
 import com.eaxor.easy2share.domain.usecase.GetIpAddressUseCase
 import com.eaxor.easy2share.domain.usecase.ShareClipboardContentUseCase
+import com.eaxor.easy2share.domain.usecase.ShareFilesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,6 +36,7 @@ class HomeViewModel
         private val getClipboardContent: GetClipboardContentUseCase,
         private val getIpAddress: GetIpAddressUseCase,
         private val shareClipboardContent: ShareClipboardContentUseCase,
+        private val shareFiles: ShareFilesUseCase,
     ) : ViewModel() {
         val serverAddress: String
             get() {
@@ -107,6 +109,43 @@ class HomeViewModel
                 } else {
                     shareClipboardContent(content)
                     _events.emit(HomeEvents.ClipboardShared)
+                }
+            }
+        }
+
+        /**
+         * Reacts to the "SHARE FILES" button.
+         *
+         * Only asks the UI to open the document picker once sharing is on, so the
+         * user is never sent into a picker whose result could not be delivered.
+         */
+        fun onShareFilesClicked() {
+            viewModelScope.launch {
+                if (_uiState.value !is HomeUiState.ServerRunning) {
+                    _events.emit(HomeEvents.SharingNotActive)
+                    return@launch
+                }
+                _events.emit(HomeEvents.PickFiles)
+            }
+        }
+
+        /**
+         * Hands the documents picked by the user to the web engine, which encrypts
+         * and streams them to every connected client. [fileUris] are opaque
+         * location strings; an empty selection is a silent no-op.
+         */
+        fun onFilesSelected(fileUris: List<String>) {
+            if (fileUris.isEmpty()) return
+            viewModelScope.launch {
+                if (_uiState.value !is HomeUiState.ServerRunning) {
+                    _events.emit(HomeEvents.SharingNotActive)
+                    return@launch
+                }
+                val sharedCount = shareFiles(fileUris)
+                if (sharedCount == 0) {
+                    _events.emit(HomeEvents.FilesShareFailed)
+                } else {
+                    _events.emit(HomeEvents.FilesShared(sharedCount))
                 }
             }
         }

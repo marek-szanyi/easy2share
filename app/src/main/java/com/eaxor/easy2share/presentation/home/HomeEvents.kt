@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Eaxor llc.
+ * Copyright (c) 2026 Eaxor LLC.
  * SPDX-License-Identifier: MIT
  * Licensed under the MIT License. See LICENSE file in the project root for full license information.
  */
@@ -38,4 +38,13 @@ sealed class HomeEvents {
     object ClipboardEmpty : HomeEvents()
 
     object SharingNotActive : HomeEvents()
+
+    /** Asks the UI to open the system document picker. */
+    object PickFiles : HomeEvents()
+
+    data class FilesShared(
+        val fileCount: Int,
+    ) : HomeEvents()
+
+    object FilesShareFailed : HomeEvents()
 }

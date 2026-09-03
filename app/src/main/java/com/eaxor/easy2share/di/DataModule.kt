@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Eaxor llc.
+ * Copyright (c) 2026 Eaxor LLC.
  * SPDX-License-Identifier: MIT
  * Licensed under the MIT License. See LICENSE file in the project root for full license information.
  */
@@ -8,10 +8,12 @@ package com.eaxor.easy2share.di
 import com.eaxor.easy2share.data.local.OnboardingLocalDataSource
 import com.eaxor.easy2share.data.local.OnboardingPreferencesDataSource
 import com.eaxor.easy2share.data.repository.ClipboardRepositoryImpl
+import com.eaxor.easy2share.data.repository.FileRepositoryImpl
 import com.eaxor.easy2share.data.repository.NetworkRepositoryImpl
 import com.eaxor.easy2share.data.repository.OnboardingRepositoryImpl
 import com.eaxor.easy2share.data.repository.PermissionRepositoryImpl
 import com.eaxor.easy2share.domain.repository.ClipboardRepository
+import com.eaxor.easy2share.domain.repository.FileRepository
 import com.eaxor.easy2share.domain.repository.NetworkRepository
 import com.eaxor.easy2share.domain.repository.OnboardingRepository
 import com.eaxor.easy2share.domain.repository.PermissionRepository
@@ -41,6 +43,10 @@ abstract class DataModule {
     @Binds
     @Singleton
     abstract fun bindClipboardRepository(impl: ClipboardRepositoryImpl): ClipboardRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindFileRepository(impl: FileRepositoryImpl): FileRepository
 
     @Binds
     @Singleton
