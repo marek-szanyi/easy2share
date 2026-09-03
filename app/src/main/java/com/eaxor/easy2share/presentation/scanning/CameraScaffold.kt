@@ -51,8 +51,8 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 fun CameraScaffold(
     permissions: List<String>,
     modifier: Modifier = Modifier,
-    rationale: String = "This sample needs camera access to run.",
-    deniedMessage: String = "Camera access was denied. Enable it in Settings to use this sample.",
+    rationale: String = "Camera access is required to scan QR codes.",
+    deniedMessage: String = "Camera access was denied. Enable it in Settings to scan QR codes.",
     content: @Composable BoxScope.() -> Unit,
 ) {
     val context = LocalContext.current
