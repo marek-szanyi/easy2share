@@ -38,4 +38,13 @@ sealed class HomeEvents {
     object ClipboardEmpty : HomeEvents()
 
     object SharingNotActive : HomeEvents()
+
+    /** Asks the UI to open the system document picker. */
+    object PickFiles : HomeEvents()
+
+    data class FilesShared(
+        val fileCount: Int,
+    ) : HomeEvents()
+
+    object FilesShareFailed : HomeEvents()
 }
