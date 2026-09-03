@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Eaxor llc.
+ * Copyright (c) 2026 Eaxor LLC.
  * SPDX-License-Identifier: MIT
  * Licensed under the MIT License. See LICENSE file in the project root for full license information.
  */
@@ -18,8 +18,8 @@ import android.util.Log
 import com.eaxor.easy2share.Constants
 import com.eaxor.easy2share.MainActivity
 import com.eaxor.easy2share.R
-import com.eaxor.easy2share.domain.webengine.TlsWebsocketEngine
-import com.eaxor.easy2share.domain.webengine.buildWebsocketEngine
+import com.eaxor.easy2share.data.webengine.TlsWebsocketEngine
+import com.eaxor.easy2share.data.webengine.buildWebsocketEngine
 import kotlinx.coroutines.Dispatchers
 
 /**
@@ -47,7 +47,7 @@ class WebEngineService : Service() {
             startForeground(
                 NOTIFICATION_ID,
                 buildNotification(),
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE,
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC,
             )
             startWebEngine(port, linkKey)
         }

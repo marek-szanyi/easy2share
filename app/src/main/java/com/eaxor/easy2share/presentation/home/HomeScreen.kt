@@ -1,12 +1,15 @@
 /*
- * Copyright (c) 2026 Eaxor llc.
+ * Copyright (c) 2026 Eaxor LLC.
  * SPDX-License-Identifier: MIT
  * Licensed under the MIT License. See LICENSE file in the project root for full license information.
  */
 package com.eaxor.easy2share.presentation.home
 
 import android.annotation.SuppressLint
+import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -33,6 +36,7 @@ import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.QrCode
 import androidx.compose.material.icons.rounded.Share
+import androidx.compose.material.icons.rounded.UploadFile
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -49,7 +53,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.eaxor.easy2share.R
+import com.eaxor.easy2share.domain.repository.ClipboardRepository
+import com.eaxor.easy2share.domain.repository.FileRepository
+import com.eaxor.easy2share.domain.repository.NetworkRepository
 import com.eaxor.easy2share.domain.usecase.GetClipboardContentUseCase
+import com.eaxor.easy2share.domain.usecase.GetIpAddressUseCase
+import com.eaxor.easy2share.domain.usecase.ShareClipboardContentUseCase
+import com.eaxor.easy2share.domain.usecase.ShareFilesUseCase
 import com.eaxor.easy2share.presentation.components.BrutalistActionButton
 import com.eaxor.easy2share.presentation.components.BrutalistBackdrop
 import com.eaxor.easy2share.presentation.components.HazardStripe
@@ -60,6 +70,9 @@ import com.eaxor.easy2share.ui.theme.IndustrialInk
 import com.eaxor.easy2share.ui.theme.IndustrialPaper
 import dev.muazkadan.switchycompose.TextSwitch
 
+/** The document picker accepts any file type. */
+private const val ANY_MIME_TYPE = "*/*"
+
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
@@ -68,6 +81,10 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val filePickerLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
+            viewModel.onFilesSelected(uris.map(Uri::toString))
+        }
 
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
@@ -115,6 +132,32 @@ fun HomeScreen(
                             Toast.LENGTH_LONG,
                         ).show()
                 }
+
+                HomeEvents.PickFiles -> {
+                    filePickerLauncher.launch(arrayOf(ANY_MIME_TYPE))
+                }
+
+                is HomeEvents.FilesShared -> {
+                    Toast
+                        .makeText(
+                            context,
+                            context.resources.getQuantityString(
+                                R.plurals.home_files_shared_toast,
+                                event.fileCount,
+                                event.fileCount,
+                            ),
+                            Toast.LENGTH_SHORT,
+                        ).show()
+                }
+
+                HomeEvents.FilesShareFailed -> {
+                    Toast
+                        .makeText(
+                            context,
+                            R.string.home_files_share_failed_toast,
+                            Toast.LENGTH_LONG,
+                        ).show()
+                }
             }
         }
     }
@@ -124,6 +167,7 @@ fun HomeScreen(
         viewModel = viewModel,
         modifier = modifier,
         onShareClipboardClick = viewModel::onShareClipboardClicked,
+        onShareFilesClick = viewModel::onShareFilesClicked,
         onScanQrClick = onScanQrClick,
         onSharingToggle = viewModel::onSharingToggled,
     )
@@ -135,6 +179,7 @@ fun HomeScreen(
     viewModel: HomeViewModel,
     modifier: Modifier = Modifier,
     onShareClipboardClick: () -> Unit = {},
+    onShareFilesClick: () -> Unit = {},
     onScanQrClick: () -> Unit = {},
     onSharingToggle: (Boolean) -> Unit = {},
 ) {
@@ -168,6 +213,7 @@ fun HomeScreen(
                 item {
                     HomeActions(
                         onShareClipboardClick = onShareClipboardClick,
+                        onShareFilesClick = onShareFilesClick,
                         onScanQrClick = onScanQrClick,
                     )
                 }
@@ -346,6 +392,7 @@ private fun ServerLinkPanel(
 @Composable
 private fun HomeActions(
     onShareClipboardClick: () -> Unit,
+    onShareFilesClick: () -> Unit,
     onScanQrClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -359,7 +406,13 @@ private fun HomeActions(
             onClick = onShareClipboardClick,
             modifier = Modifier.weight(1f),
         )
-        // TODO! Add functionality to share files
+        BrutalistActionButton(
+            icon = Icons.Rounded.UploadFile,
+            label = stringResource(R.string.share_files_title),
+            containerColor = HazardYellow,
+            onClick = onShareFilesClick,
+            modifier = Modifier.weight(1f),
+        )
     }
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -640,6 +693,31 @@ private fun HomeUiState.statusLabel(): Int =
 
 private fun Int.twoDigits(): String = toString().padStart(2, '0')
 
+private val previewClipboardRepository =
+    object : ClipboardRepository {
+        override suspend fun getContent(): String? = null
+
+        override suspend fun share(content: String) = Unit
+    }
+
+private val previewNetworkRepository =
+    object : NetworkRepository {
+        override fun getIpAddress(): String = "192.168.0.25"
+    }
+
+private val previewFileRepository =
+    object : FileRepository {
+        override suspend fun share(fileUris: List<String>): Int = 0
+    }
+
+private fun previewHomeViewModel() =
+    HomeViewModel(
+        getClipboardContent = GetClipboardContentUseCase(previewClipboardRepository),
+        getIpAddress = GetIpAddressUseCase(previewNetworkRepository),
+        shareClipboardContent = ShareClipboardContentUseCase(previewClipboardRepository),
+        shareFiles = ShareFilesUseCase(previewFileRepository),
+    )
+
 @SuppressLint("ViewModelConstructorInComposable")
 @Preview(showBackground = true, widthDp = 411, heightDp = 891)
 @Composable
@@ -647,7 +725,7 @@ private fun HomeScreenPreview() {
     Easy2shareTheme(darkTheme = false) {
         HomeScreen(
             uiState = HomeUiState.Scanning,
-            viewModel = HomeViewModel(GetClipboardContentUseCase(LocalContext.current)),
+            viewModel = previewHomeViewModel(),
 //                HomeUiState.ServerRunning(
 //                    serverAddress = "192.168.0.25",
 //                    serverPort = 8080,
@@ -669,7 +747,7 @@ private fun EmptyHomeScreenPreview() {
                     serverAddress = "192.168.0.25",
                     serverPort = 8080,
                 ),
-            viewModel = HomeViewModel(GetClipboardContentUseCase(LocalContext.current)),
+            viewModel = previewHomeViewModel(),
         )
     }
 }
