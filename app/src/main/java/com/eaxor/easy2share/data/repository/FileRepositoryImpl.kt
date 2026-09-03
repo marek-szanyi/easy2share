@@ -1,14 +1,14 @@
 /*
- * Copyright (c) 2026 Eaxor llc.
+ * Copyright (c) 2026 Eaxor LLC.
  * SPDX-License-Identifier: MIT
  * Licensed under the MIT License. See LICENSE file in the project root for full license information.
  */
 package com.eaxor.easy2share.data.repository
 
 import android.content.Context
-import android.net.Uri
 import android.provider.OpenableColumns
 import android.util.Log
+import androidx.core.net.toUri
 import com.eaxor.easy2share.data.webengine.SharedFile
 import com.eaxor.easy2share.data.webengine.shareFiles
 import com.eaxor.easy2share.domain.repository.FileRepository
@@ -16,7 +16,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-import androidx.core.net.toUri
 
 /**
  * Resolves the documents picked through the Storage Access Framework and hands
