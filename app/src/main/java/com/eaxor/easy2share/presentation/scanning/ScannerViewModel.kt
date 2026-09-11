@@ -51,6 +51,12 @@ class ScannerViewModel
                     return
                 }
 
+            if (decodedLinkKey.size != LINK_KEY_SIZE_BYTES) {
+                _uiState.value =
+                    ScannerUiState.Error("The detected QR code does not contain a valid link key.")
+                return
+            }
+
             linkKeyRaw = decodedLinkKey
             _uiState.value = ScannerUiState.Finished(qrCode)
         }
@@ -63,5 +69,9 @@ class ScannerViewModel
             if (_uiState.value is ScannerUiState.Finished) {
                 _uiState.value = ScannerUiState.Initial
             }
+        }
+
+        private companion object {
+            const val LINK_KEY_SIZE_BYTES = 32
         }
     }

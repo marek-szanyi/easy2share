@@ -22,20 +22,34 @@ class ScannerViewModelTest {
 
     @Test
     fun `valid QR code stores link key and finishes scanning`() {
+        val linkKey = ByteArray(32) { it.toByte() }
         viewModel.setQrCodes(
-            qrCodes = listOf(DetectedQr(value = "AQIDBA==", bounds = null)),
+            qrCodes =
+                listOf(
+                    DetectedQr(
+                        value = "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=",
+                        bounds = null,
+                    ),
+                ),
             sourceWidth = 640,
             sourceHeight = 480,
         )
 
-        assertArrayEquals(byteArrayOf(1, 2, 3, 4), viewModel.linkKeyRaw)
+        assertArrayEquals(linkKey, viewModel.linkKeyRaw)
         assertTrue(viewModel.uiState.value is ScannerUiState.Finished)
     }
 
     @Test
     fun `handled result preserves link key and allows another scan`() {
+        val linkKey = ByteArray(32) { it.toByte() }
         viewModel.setQrCodes(
-            qrCodes = listOf(DetectedQr(value = "AQIDBA==", bounds = null)),
+            qrCodes =
+                listOf(
+                    DetectedQr(
+                        value = "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=",
+                        bounds = null,
+                    ),
+                ),
             sourceWidth = 640,
             sourceHeight = 480,
         )
@@ -43,7 +57,7 @@ class ScannerViewModelTest {
         viewModel.onScanResultHandled()
         viewModel.initialize()
 
-        assertArrayEquals(byteArrayOf(1, 2, 3, 4), viewModel.linkKeyRaw)
+        assertArrayEquals(linkKey, viewModel.linkKeyRaw)
         assertTrue(viewModel.uiState.value is ScannerUiState.Scanning)
     }
 
@@ -63,6 +77,18 @@ class ScannerViewModelTest {
     fun `invalid QR code reports an error`() {
         viewModel.setQrCodes(
             qrCodes = listOf(DetectedQr(value = "not a link key!", bounds = null)),
+            sourceWidth = 640,
+            sourceHeight = 480,
+        )
+
+        assertNull(viewModel.linkKeyRaw)
+        assertTrue(viewModel.uiState.value is ScannerUiState.Error)
+    }
+
+    @Test
+    fun `wrong length link key reports an error`() {
+        viewModel.setQrCodes(
+            qrCodes = listOf(DetectedQr(value = "AQIDBA==", bounds = null)),
             sourceWidth = 640,
             sourceHeight = 480,
         )

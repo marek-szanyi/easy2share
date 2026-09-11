@@ -13,12 +13,12 @@ import com.eaxor.easy2share.domain.usecase.GetIpAddressUseCase
 import com.eaxor.easy2share.domain.usecase.ShareClipboardContentUseCase
 import com.eaxor.easy2share.domain.usecase.ShareFilesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -46,14 +46,13 @@ class HomeViewModel
 
         fun setScannedKey(linkKeyRaw: ByteArray?) {
             linkKey = linkKeyRaw
-            // Never downgrade an active sharing session on recomposition.
-            if (_uiState.value is HomeUiState.ServerRunning) return
-            _uiState.value =
-                if (linkKeyRaw == null || linkKeyRaw.isEmpty()) {
-                    HomeUiState.AwaitingSessionKey(linkKey = null, getIpAddress())
-                } else {
-                    HomeUiState.CanStartServer(linkKeyRaw, getIpAddress())
+            if (linkKeyRaw == null || linkKeyRaw.isEmpty()) {
+                if (_uiState.value !is HomeUiState.ServerRunning) {
+                    _uiState.value = HomeUiState.AwaitingSessionKey(linkKey = null, getIpAddress())
                 }
+                return
+            }
+            onSharingToggled(isSharing = true)
         }
 
         /**
@@ -69,7 +68,7 @@ class HomeViewModel
                 val key = linkKey
                 if (key == null || key.isEmpty()) {
                     viewModelScope.launch {
-                        _events.emit(HomeEvents.EncryptionKeyMissing)
+                        _events.send(HomeEvents.EncryptionKeyMissing)
                     }
                     return
                 }
@@ -79,12 +78,12 @@ class HomeViewModel
                         serverPort = Constants.DEFAULT_PORT,
                     )
                 viewModelScope.launch {
-                    _events.emit(HomeEvents.StartServer(key, Constants.DEFAULT_PORT))
+                    _events.send(HomeEvents.StartServer(key, Constants.DEFAULT_PORT))
                 }
             } else if (linkKey != null && linkKey!!.isNotEmpty()) {
                 _uiState.value = HomeUiState.CanStartServer(linkKey, getIpAddress())
                 viewModelScope.launch {
-                    _events.emit(HomeEvents.StopServer)
+                    _events.send(HomeEvents.StopServer)
                 }
             }
         }
@@ -100,15 +99,15 @@ class HomeViewModel
         fun onShareClipboardClicked() {
             viewModelScope.launch {
                 if (_uiState.value !is HomeUiState.ServerRunning) {
-                    _events.emit(HomeEvents.SharingNotActive)
+                    _events.send(HomeEvents.SharingNotActive)
                     return@launch
                 }
                 val content = getClipboardContent()
                 if (content.isNullOrEmpty()) {
-                    _events.emit(HomeEvents.ClipboardEmpty)
+                    _events.send(HomeEvents.ClipboardEmpty)
                 } else {
                     shareClipboardContent(content)
-                    _events.emit(HomeEvents.ClipboardShared)
+                    _events.send(HomeEvents.ClipboardShared)
                 }
             }
         }
@@ -122,10 +121,10 @@ class HomeViewModel
         fun onShareFilesClicked() {
             viewModelScope.launch {
                 if (_uiState.value !is HomeUiState.ServerRunning) {
-                    _events.emit(HomeEvents.SharingNotActive)
+                    _events.send(HomeEvents.SharingNotActive)
                     return@launch
                 }
-                _events.emit(HomeEvents.PickFiles)
+                _events.send(HomeEvents.PickFiles)
             }
         }
 
@@ -138,14 +137,14 @@ class HomeViewModel
             if (fileUris.isEmpty()) return
             viewModelScope.launch {
                 if (_uiState.value !is HomeUiState.ServerRunning) {
-                    _events.emit(HomeEvents.SharingNotActive)
+                    _events.send(HomeEvents.SharingNotActive)
                     return@launch
                 }
                 val sharedCount = shareFiles(fileUris)
                 if (sharedCount == 0) {
-                    _events.emit(HomeEvents.FilesShareFailed)
+                    _events.send(HomeEvents.FilesShareFailed)
                 } else {
-                    _events.emit(HomeEvents.FilesShared(sharedCount))
+                    _events.send(HomeEvents.FilesShared(sharedCount))
                 }
             }
         }
@@ -153,8 +152,8 @@ class HomeViewModel
         private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.PermissionsNeeded)
         val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
-        private val _events = MutableSharedFlow<HomeEvents>(replay = 0)
-        val events: SharedFlow<HomeEvents> = _events.asSharedFlow()
+        private val _events = Channel<HomeEvents>(Channel.BUFFERED)
+        val events: Flow<HomeEvents> = _events.receiveAsFlow()
 
         init {
             viewModelScope.launch {
