@@ -90,6 +90,7 @@ android {
             excludes += "META-INF/INDEX.LIST"
             excludes += "META-INF/io.netty.versions.properties"
             excludes += "META-INF/services/reactor.blockhound.integration.BlockHoundIntegration"
+            excludes += "META-INF/services/reactor.blockhound.integration.BlockHoundIntegration."
         }
     }
 }
