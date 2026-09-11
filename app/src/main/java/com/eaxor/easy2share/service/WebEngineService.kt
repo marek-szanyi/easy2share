@@ -23,12 +23,11 @@ import com.eaxor.easy2share.data.webengine.buildWebsocketEngine
 import kotlinx.coroutines.Dispatchers
 
 /**
- * Foreground service hosting the embedded WebEngine server
- * server so sharing keeps running while the app is backgrounded.
+ * Foreground service hosting the embedded WebEngine server,
+ * so sharing keeps running while the app is backgrounded.
  *
- * Started when the user flips the home screen switch to "SHARING ON" and fully
- * disposed (server stopped, notification removed) when the switch is set back
- * to "NOT SHARING".
+ * Started after a successful QR scan or when the user flips the home screen
+ * switch to "SHARING ON", and fully disposed when sharing is switched off.
  */
 class WebEngineService : Service() {
     private var webEngine: TlsWebsocketEngine? = null
@@ -63,7 +62,7 @@ class WebEngineService : Service() {
         port: Int,
         linkKey: ByteArray,
     ) {
-        if (webEngine != null) return
+        if (webEngine != null) stopWebEngine()
         webEngine =
             buildWebsocketEngine(Dispatchers.IO, port, linkKey).also {
                 it.start(wait = false)

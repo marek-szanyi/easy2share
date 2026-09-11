@@ -71,16 +71,18 @@ private fun Easy2ShareApp() {
         }
 
         uiState.onboardingCompleted -> {
+            val homeViewModel: HomeViewModel = hiltViewModel()
             PermissionDialogs()
             if (scannerVisible) {
                 BackHandler { scannerVisible = false }
                 ScannerScreen(
-                    onScanFinished = { scannerVisible = false },
+                    onScanFinished = {
+                        scannerViewModel.linkKeyRaw?.let(homeViewModel::setScannedKey)
+                        scannerVisible = false
+                    },
                     viewModel = scannerViewModel,
                 )
             } else {
-                val homeViewModel: HomeViewModel = hiltViewModel()
-                homeViewModel.setScannedKey(scannerViewModel.linkKeyRaw)
                 HomeScreen(
                     viewModel = homeViewModel,
                     onScanQrClick = { scannerVisible = true },
