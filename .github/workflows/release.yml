@@ -52,6 +52,30 @@ jobs:
             echo "Keystore file is missing or empty!" && exit 1
           fi
 
+      - name: Resolve Signing Alias
+        run: |
+          set -euo pipefail
+
+          if [ -z "${ANDROID_KEYSTORE_PASSWORD}" ]; then
+            echo "ANDROID_KEYSTORE_PASSWORD is required." && exit 1
+          fi
+
+          detected_alias="$(keytool -list -keystore keystore.jks -storepass "${ANDROID_KEYSTORE_PASSWORD}" \
+            | sed -n 's/^\([^,][^,]*\), .*/\1/p' \
+            | head -n 1)"
+
+          if [ -z "${detected_alias}" ]; then
+            echo "Unable to detect a key alias from keystore.jks." && exit 1
+          fi
+
+          if [ -n "${ANDROID_KEY_ALIAS}" ] && ! keytool -list -keystore keystore.jks -storepass "${ANDROID_KEYSTORE_PASSWORD}" -alias "${ANDROID_KEY_ALIAS}" > /dev/null 2>&1; then
+            echo "Configured ANDROID_KEY_ALIAS was not found in keystore.jks; using detected alias."
+            echo "ANDROID_KEY_ALIAS=${detected_alias}" >> "${GITHUB_ENV}"
+          elif [ -z "${ANDROID_KEY_ALIAS}" ]; then
+            echo "ANDROID_KEY_ALIAS is not set; using detected alias."
+            echo "ANDROID_KEY_ALIAS=${detected_alias}" >> "${GITHUB_ENV}"
+          fi
+
       - name: Build Release APK
         run: |
           ./gradlew clean assembleRelease
