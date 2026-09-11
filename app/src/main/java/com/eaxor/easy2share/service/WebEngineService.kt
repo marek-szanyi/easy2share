@@ -20,6 +20,7 @@ import com.eaxor.easy2share.MainActivity
 import com.eaxor.easy2share.R
 import com.eaxor.easy2share.data.webengine.TlsWebsocketEngine
 import com.eaxor.easy2share.data.webengine.buildWebsocketEngine
+import com.eaxor.easy2share.data.webengine.resetWebEngineState
 import kotlinx.coroutines.Dispatchers
 
 /**
@@ -72,6 +73,7 @@ class WebEngineService : Service() {
 
     private fun stopWebEngine() {
         webEngine?.stop(SERVER_STOP_GRACE_MILLIS, SERVER_STOP_TIMEOUT_MILLIS)
+        resetWebEngineState()
         webEngine = null
         Log.i(TAG, "WebEngine embedded server stopped")
     }

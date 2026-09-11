@@ -73,6 +73,12 @@ val notifyClients = Channel<String>(capacity = 1, onBufferOverflow = BufferOverf
  */
 val shareFiles = Channel<SharedFile>(capacity = Channel.UNLIMITED)
 
+internal fun resetWebEngineState() {
+    connectedSessions.clear()
+    while (notifyClients.tryReceive().isSuccess) {}
+    while (shareFiles.tryReceive().isSuccess) {}
+}
+
 /** Payload size of a single [FileChunkMessage] before encryption. */
 private const val FILE_CHUNK_SIZE = 128 * 1024
 
